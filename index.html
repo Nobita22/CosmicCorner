@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Corner </title>
+    <title>Cosmic Corner</title>
     <style>
         * {
             margin: 0;
@@ -1085,7 +1085,7 @@
         <!-- Categories Page -->
         <div id="categoriesPage" class="page">
             <div class="container">
-                <button class="detail-back" onclick="app.goHome()">← Back to Home</button>
+                <button class="detail-back" onclick="app.goBack()">← Back</button>
                 <h2 class="section-title" id="categoryTitle">All Products</h2>
                 <div class="products-grid" id="categoryProductsGrid"></div>
             </div>
@@ -1198,15 +1198,19 @@
         const app = {
             cart: [],
             currentPage: 'home',
+            previousPage: 'home',
             shippingCost: 49,
             customizations: {},
             currentProductId: null,
+            currentCategory: null,
+            pageHistory: [],
 
             init() {
                 this.generateRandomStars();
                 this.generateShootingStars();
                 this.renderHome();
                 this.setupEventListeners();
+                this.setupNavigation();
             },
 
             generateRandomStars() {
@@ -1255,6 +1259,40 @@
                 });
             },
 
+            setupNavigation() {
+                // Handle browser back/forward buttons
+                window.addEventListener('popstate', (event) => {
+                    if (event.state && event.state.page) {
+                        this.setPage(event.state.page, false);
+                    } else {
+                        this.goHome();
+                    }
+                });
+
+                // Handle mobile swipe back
+                let touchStartX = 0;
+                let touchEndX = 0;
+                
+                document.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                });
+
+                document.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    this.handleSwipe();
+                });
+            },
+
+            handleSwipe() {
+                const swipeThreshold = 100;
+                const swipeDistance = touchEndX - touchStartX;
+                
+                // Right swipe (back gesture)
+                if (swipeDistance > swipeThreshold && this.currentPage !== 'home') {
+                    this.goBack();
+                }
+            },
+
             renderHome() {
                 this.setPage('home');
                 this.renderCategories();
@@ -1296,9 +1334,13 @@
 
             filterByCategory(category) {
                 const filtered = products.filter(p => p.category === category);
+                this.currentCategory = category;
                 this.setPage('categories');
                 document.getElementById('categoryTitle').textContent = category;
                 this.renderCategoryProducts(filtered);
+                
+                // Update browser history
+                history.pushState({ page: 'categories', category: category }, '', `#category-${category}`);
             },
 
             renderCategoryProducts(productsToShow) {
@@ -1364,6 +1406,9 @@
                     </div>
                 `;
                 window.scrollTo(0, 0);
+                
+                // Update browser history
+                history.pushState({ page: 'product', id: id }, '', `#product-${id}`);
             },
 
             openCustomizationModal(productId, productName) {
@@ -1598,16 +1643,71 @@
                 this.setPage('home');
                 document.getElementById('searchInput').value = '';
                 window.scrollTo(0, 0);
+                
+                // Update browser history
+                history.replaceState({ page: 'home' }, '', '#');
             },
 
             goBack() {
-                this.goHome();
+                // Store current page as previous
+                const previousPage = this.previousPage;
+                
+                // Navigate based on current page
+                switch (this.currentPage) {
+                    case 'product':
+                        if (this.currentCategory) {
+                            // Go back to category page
+                            const filtered = products.filter(p => p.category === this.currentCategory);
+                            this.setPage('categories');
+                            document.getElementById('categoryTitle').textContent = this.currentCategory;
+                            this.renderCategoryProducts(filtered);
+                        } else {
+                            // Go back to home
+                            this.setPage('home');
+                            this.renderCategories();
+                            this.renderProducts(products);
+                        }
+                        break;
+                        
+                    case 'categories':
+                        // Go back to home
+                        this.setPage('home');
+                        this.renderCategories();
+                        this.renderProducts(products);
+                        break;
+                        
+                    case 'checkout':
+                        // Go back to previous page
+                        if (previousPage === 'home') {
+                            this.goHome();
+                        } else if (previousPage === 'categories') {
+                            const filtered = products.filter(p => p.category === this.currentCategory);
+                            this.setPage('categories');
+                            document.getElementById('categoryTitle').textContent = this.currentCategory;
+                            this.renderCategoryProducts(filtered);
+                        } else {
+                            this.goHome();
+                        }
+                        break;
+                        
+                    default:
+                        this.goHome();
+                }
+                
+                // Update browser back state
+                history.back();
             },
 
-            setPage(pageName) {
+            setPage(pageName, updateHistory = true) {
+                this.previousPage = this.currentPage;
+                this.currentPage = pageName;
+                
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById(pageName + 'Page').classList.add('active');
-                this.currentPage = pageName;
+                
+                if (updateHistory) {
+                    this.pageHistory.push(pageName);
+                }
             }
         };
 
