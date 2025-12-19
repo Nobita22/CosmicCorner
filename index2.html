@@ -1430,7 +1430,62 @@
     </footer>
 
     <script>
-        // Product data
+        // ==================== NAVIGATION STATE MANAGER ====================
+        class NavigationStateManager {
+            constructor() {
+                this.navigationStack = [];
+                this.currentState = null;
+                this.isNavigating = false;
+            }
+
+            // Push a new state to stack
+            pushState(state) {
+                this.navigationStack.push(state);
+                this.currentState = state;
+                window.history.pushState(state, '', this.getStateURL(state));
+            }
+
+            // Pop state and return to previous
+            popState() {
+                if (this.navigationStack.length > 1) {
+                    this.navigationStack.pop();
+                    this.currentState = this.navigationStack[this.navigationStack.length - 1];
+                    return this.currentState;
+                }
+                return null;
+            }
+
+            // Get URL based on state
+            getStateURL(state) {
+                switch (state.type) {
+                    case 'product-detail':
+                        return `?view=product&id=${state.productId}`;
+                    case 'filter':
+                        return `?view=shop&filter=${state.filter}&search=${state.search || ''}`;
+                    case 'cart':
+                        return '?view=cart';
+                    case 'request':
+                        return `?view=request&id=${state.productId}`;
+                    default:
+                        return '?view=shop';
+                }
+            }
+
+            // Get current state
+            getCurrentState() {
+                return this.currentState;
+            }
+
+            // Reset navigation
+            resetNavigation() {
+                this.navigationStack = [{ type: 'shop' }];
+                this.currentState = { type: 'shop' };
+            }
+        }
+
+        // ==================== MAIN APP ====================
+        const navManager = new NavigationStateManager();
+
         const products = [
             { id: 1, name: 'Cosmic Ring', price: 299, emoji: '💍', description: 'Elegant sterling silver ring with celestial design. Perfect for cosmic lovers.', tags: ['Ring', 'Premium'], stock: true },
             { id: 2, name: 'Star Necklace', price: 399, emoji: '⭐', description: 'Timeless star-shaped pendant necklace. A symbol of hope and guidance.', tags: ['Necklace', 'Premium'], stock: true },
@@ -1447,6 +1502,8 @@
         let showCustomization = {};
         let currentHeroSlide = 0;
         let heroInterval;
+        let currentSearchTerm = '';
+        let currentFilterType = 'all';
 
         function createStars() {
             const bg = document.getElementById('starsBg');
@@ -1473,7 +1530,6 @@
             }, 2000);
         }
 
-        // INIT HERO CAROUSEL - WITH DIRECT ONCLICK
         function initHeroCarousel() {
             const carousel = document.getElementById('heroCarousel');
             const dots = document.getElementById('heroDots');
@@ -1571,6 +1627,9 @@
             const product = products.find(p => p.id === id);
             if (!product) return;
 
+            // Push state to navigation stack
+            navManager.pushState({ type: 'product-detail', productId: id });
+
             currentDetailProductId = id;
             detailQty = 1;
             showCustomization[id] = false;
@@ -1603,12 +1662,43 @@
         }
 
         function closeProductDetail() {
+            // Pop state from navigation stack
+            const prevState = navManager.popState();
+            
             document.getElementById('productDetailModal').classList.remove('active');
+
+            // If returning to shop with filters, restore them
+            if (prevState && prevState.type === 'shop') {
+                restoreFiltersAndSearch(prevState);
+            }
+        }
+
+        function restoreFiltersAndSearch(state) {
+            if (state.search) {
+                document.getElementById('searchInput').value = state.search;
+                currentSearchTerm = state.search;
+            }
+            if (state.filter) {
+                currentFilterType = state.filter;
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.filter === state.filter) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            filterProducts();
         }
 
         function filterProducts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+
+            currentSearchTerm = searchTerm;
+            currentFilterType = activeFilter;
+
+            // Push state to navigation stack
+            navManager.pushState({ type: 'filter', filter: activeFilter, search: searchTerm });
 
             filteredProducts = products.filter(p => {
                 const matchesSearch = p.name.toLowerCase().includes(searchTerm) || 
@@ -1709,19 +1799,23 @@
 
         // Event Listeners
         document.getElementById('checkoutBtn').addEventListener('click', () => {
+            navManager.pushState({ type: 'cart' });
             document.getElementById('cartModal').classList.remove('active');
             document.getElementById('checkoutModal').classList.add('active');
         });
 
         document.getElementById('cancelBtn').addEventListener('click', () => {
+            navManager.popState();
             document.getElementById('checkoutModal').classList.remove('active');
         });
 
         document.getElementById('floatingCartBtn').addEventListener('click', () => {
+            navManager.pushState({ type: 'cart' });
             document.getElementById('cartModal').classList.add('active');
         });
 
         document.getElementById('closeCartBtn').addEventListener('click', () => {
+            navManager.popState();
             document.getElementById('cartModal').classList.remove('active');
         });
 
@@ -1779,12 +1873,14 @@
 
         document.getElementById('requestBtn').addEventListener('click', () => {
             const product = products.find(p => p.id === currentDetailProductId);
+            navManager.pushState({ type: 'request', productId: currentDetailProductId });
             document.getElementById('requestProductName').value = product.name + ' - ' + product.emoji;
             document.getElementById('productDetailModal').classList.remove('active');
             document.getElementById('requestModal').classList.add('active');
         });
 
         document.getElementById('closeRequestBtn').addEventListener('click', () => {
+            navManager.popState();
             document.getElementById('requestModal').classList.remove('active');
         });
 
@@ -1811,6 +1907,7 @@
             const whatsappURL = `https://wa.me/919876543210?text=${encodedMessage}`;
             window.open(whatsappURL, '_blank');
 
+            navManager.popState();
             document.getElementById('requestModal').classList.remove('active');
             document.getElementById('requestForm').reset();
         });
@@ -1849,6 +1946,7 @@
 
             cart = {};
             updateCart();
+            navManager.popState();
             document.getElementById('checkoutModal').classList.remove('active');
             document.getElementById('checkoutForm').reset();
         });
@@ -1856,10 +1954,45 @@
         document.getElementById('nextBtn').addEventListener('click', nextSlide);
         document.getElementById('prevBtn').addEventListener('click', prevSlide);
 
+        // ==================== BROWSER BACK BUTTON HANDLER ====================
+        window.addEventListener('popstate', (e) => {
+            if (e.state) {
+                const state = e.state;
+                
+                // Close all modals first
+                document.getElementById('productDetailModal').classList.remove('active');
+                document.getElementById('cartModal').classList.remove('active');
+                document.getElementById('checkoutModal').classList.remove('active');
+                document.getElementById('requestModal').classList.remove('active');
+                document.getElementById('filterModal').classList.remove('active');
+
+                // Handle state
+                switch (state.type) {
+                    case 'product-detail':
+                        openProductDetail(state.productId);
+                        break;
+                    case 'filter':
+                        restoreFiltersAndSearch(state);
+                        break;
+                    case 'cart':
+                        document.getElementById('cartModal').classList.add('active');
+                        break;
+                    case 'request':
+                        // Request modal already closed above
+                        break;
+                    case 'shop':
+                    default:
+                        // Stay on main page
+                        break;
+                }
+            }
+        });
+
         // Initialize
         createStars();
         initHeroCarousel();
         renderProducts();
+        navManager.resetNavigation();
     </script>
 </body>
 </html>
