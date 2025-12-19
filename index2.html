@@ -2,13 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>CosmicCorner - Shop</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            touch-action: pan-y pan-x;
         }
 
         body {
@@ -1438,14 +1444,12 @@
                 this.isNavigating = false;
             }
 
-            // Push a new state to stack
             pushState(state) {
                 this.navigationStack.push(state);
                 this.currentState = state;
                 window.history.pushState(state, '', this.getStateURL(state));
             }
 
-            // Pop state and return to previous
             popState() {
                 if (this.navigationStack.length > 1) {
                     this.navigationStack.pop();
@@ -1455,7 +1459,6 @@
                 return null;
             }
 
-            // Get URL based on state
             getStateURL(state) {
                 switch (state.type) {
                     case 'product-detail':
@@ -1471,19 +1474,16 @@
                 }
             }
 
-            // Get current state
             getCurrentState() {
                 return this.currentState;
             }
 
-            // Reset navigation
             resetNavigation() {
                 this.navigationStack = [{ type: 'shop' }];
                 this.currentState = { type: 'shop' };
             }
         }
 
-        // ==================== MAIN APP ====================
         const navManager = new NavigationStateManager();
 
         const products = [
@@ -1627,7 +1627,6 @@
             const product = products.find(p => p.id === id);
             if (!product) return;
 
-            // Push state to navigation stack
             navManager.pushState({ type: 'product-detail', productId: id });
 
             currentDetailProductId = id;
@@ -1662,13 +1661,11 @@
         }
 
         function closeProductDetail() {
-            // Pop state from navigation stack
             const prevState = navManager.popState();
             
             document.getElementById('productDetailModal').classList.remove('active');
 
-            // If returning to shop with filters, restore them
-            if (prevState && prevState.type === 'shop') {
+            if (prevState && prevState.type === 'filter') {
                 restoreFiltersAndSearch(prevState);
             }
         }
@@ -1697,7 +1694,6 @@
             currentSearchTerm = searchTerm;
             currentFilterType = activeFilter;
 
-            // Push state to navigation stack
             navManager.pushState({ type: 'filter', filter: activeFilter, search: searchTerm });
 
             filteredProducts = products.filter(p => {
@@ -1954,7 +1950,32 @@
         document.getElementById('nextBtn').addEventListener('click', nextSlide);
         document.getElementById('prevBtn').addEventListener('click', prevSlide);
 
-        // ==================== BROWSER BACK BUTTON HANDLER ====================
+        // ==================== BACK BUTTON & GESTURE HANDLERS ====================
+        function handleBackAction() {
+            // Check which modal is open and close it
+            if (document.getElementById('productDetailModal').classList.contains('active')) {
+                closeProductDetail();
+                return true;
+            } else if (document.getElementById('cartModal').classList.contains('active')) {
+                document.getElementById('cartModal').classList.remove('active');
+                navManager.popState();
+                return true;
+            } else if (document.getElementById('checkoutModal').classList.contains('active')) {
+                document.getElementById('checkoutModal').classList.remove('active');
+                navManager.popState();
+                return true;
+            } else if (document.getElementById('requestModal').classList.contains('active')) {
+                document.getElementById('requestModal').classList.remove('active');
+                navManager.popState();
+                return true;
+            } else if (document.getElementById('filterModal').classList.contains('active')) {
+                document.getElementById('filterModal').classList.remove('active');
+                return true;
+            }
+            return false;
+        }
+
+        // Browser back button handler
         window.addEventListener('popstate', (e) => {
             if (e.state) {
                 const state = e.state;
@@ -1966,7 +1987,6 @@
                 document.getElementById('requestModal').classList.remove('active');
                 document.getElementById('filterModal').classList.remove('active');
 
-                // Handle state
                 switch (state.type) {
                     case 'product-detail':
                         openProductDetail(state.productId);
@@ -1977,13 +1997,45 @@
                     case 'cart':
                         document.getElementById('cartModal').classList.add('active');
                         break;
-                    case 'request':
-                        // Request modal already closed above
-                        break;
-                    case 'shop':
                     default:
-                        // Stay on main page
                         break;
+                }
+            }
+        });
+
+        // Android swipe back gesture
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            // Detect right swipe (Android back gesture)
+            const diffX = touchEndX - touchStartX;
+            const diffY = Math.abs(touchEndY - touchStartY);
+            
+            // Right swipe: more than 50px right, less than 100px vertical movement
+            if (diffX > 50 && diffY < 100 && touchStartX < 50) {
+                if (handleBackAction()) {
+                    e.preventDefault();
+                } else {
+                    window.history.back();
+                }
+            }
+        }, { passive: true });
+
+        // Keyboard back handler (Escape key, volume down, etc)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                e.preventDefault();
+                if (!handleBackAction()) {
+                    window.history.back();
                 }
             }
         });
