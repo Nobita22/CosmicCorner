@@ -2878,7 +2878,9 @@
         // Initialize the app
         const app = new ShoppingApp();
         window.app = app;
-    
+            window.addEventListener('load', () => {
+            registerSW();
+        });
 
         // Register the Service Worker
         async function registerSW() {
@@ -2896,5 +2898,6 @@
     </script>
 </body>
 </html>
+
 
 
