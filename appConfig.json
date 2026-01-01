@@ -1,0 +1,100 @@
+appData = {
+    version: 1,
+    inventory: [
+        {
+            code: 'TOP001',
+            name: 'Spinning Top',
+            category: 'Toys',
+            description: 'Fun spinning toy for all ages - perfect for entertainment',
+            image: 'https://via.placeholder.com/150?text=Top',
+            subtypes: [
+                { subcode: 'TOP001-RED', color: 'Red', qty: 25, actualPrice: 80, sellingPrice: 150 },
+                { subcode: 'TOP001-BLU', color: 'Blue', qty: 18, actualPrice: 80, sellingPrice: 150 },
+                { subcode: 'TOP001-GRE', color: 'Green', qty: 12, actualPrice: 80, sellingPrice: 150 },
+                { subcode: 'TOP001-RB', color: 'Red+Blue Combo', qty: 8, actualPrice: 150, sellingPrice: 280 }
+            ]
+        },
+        {
+            code: 'PART001',
+            name: 'Mechanical Part',
+            category: 'Prototypes',
+            description: 'Industrial grade mechanical component for automation',
+            image: 'https://via.placeholder.com/150?text=Part',
+            subtypes: [
+                { subcode: 'PART001-ST', color: 'Steel', qty: 30, actualPrice: 450, sellingPrice: 750 },
+                { subcode: 'PART001-ALU', color: 'Aluminum', qty: 22, actualPrice: 350, sellingPrice: 600 }
+            ]
+        },
+        {
+            code: 'MINI001',
+            name: 'Mini Figurine',
+            category: 'Toys',
+            description: 'Collectible mini figurines for hobbyists and collectors',
+            image: 'https://via.placeholder.com/150?text=Figurine',
+            subtypes: [
+                { subcode: 'MINI001-DRG', color: 'Dragon', qty: 35, actualPrice: 40, sellingPrice: 99 },
+                { subcode: 'MINI001-UNI', color: 'Unicorn', qty: 28, actualPrice: 40, sellingPrice: 99 },
+                { subcode: 'MINI001-PHX', color: 'Phoenix', qty: 15, actualPrice: 50, sellingPrice: 120 }
+            ]
+        },
+        {
+            code: 'EDU001',
+            name: 'Educational Build Kit',
+            category: 'Educational Kits',
+            description: 'STEM learning kit for kids aged 8+',
+            image: 'https://via.placeholder.com/150?text=EduKit',
+            subtypes: [
+                { subcode: 'EDU001-BAS', color: 'Basic Pack', qty: 10, actualPrice: 250, sellingPrice: 450 },
+                { subcode: 'EDU001-ADV', color: 'Advanced Pack', qty: 6, actualPrice: 400, sellingPrice: 750 }
+            ]
+        },
+        {
+            code: 'DEC001',
+            name: 'Home Decor Piece',
+            category: 'Home Decor',
+            description: 'Modern 3D printed home decoration items',
+            image: 'https://via.placeholder.com/150?text=Decor',
+            subtypes: [
+                { subcode: 'DEC001-WH', color: 'White', qty: 45, actualPrice: 120, sellingPrice: 250 },
+                { subcode: 'DEC001-BLK', color: 'Black', qty: 38, actualPrice: 120, sellingPrice: 250 },
+                { subcode: 'DEC001-GLD', color: 'Gold', qty: 20, actualPrice: 150, sellingPrice: 320 }
+            ]
+        }
+    ],
+    transactions: {
+        '2025-11': [
+            { id: 'txn001', date: '2025-11-05', itemCode: 'TOP001', subcode: 'TOP001-RED', category: 'Toys', name: 'Spinning Top', qty: 3, actualPrice: 80, sellingPrice: 150, total: 450 },
+            { id: 'txn002', date: '2025-11-08', itemCode: 'PART001', subcode: 'PART001-ST', category: 'Prototypes', name: 'Mechanical Part', qty: 2, actualPrice: 450, sellingPrice: 750, total: 1500 },
+            { id: 'txn003', date: '2025-11-12', itemCode: 'MINI001', subcode: 'MINI001-DRG', category: 'Toys', name: 'Mini Figurine', qty: 5, actualPrice: 40, sellingPrice: 99, total: 495 },
+            { id: 'txn004', date: '2025-11-15', itemCode: 'DEC001', subcode: 'DEC001-WH', category: 'Home Decor', name: 'Home Decor Piece', qty: 2, actualPrice: 120, sellingPrice: 250, total: 500 },
+            { id: 'txn005', date: '2025-11-20', itemCode: 'EDU001', subcode: 'EDU001-BAS', category: 'Educational Kits', name: 'Educational Build Kit', qty: 1, actualPrice: 250, sellingPrice: 450, total: 450 },
+            { id: 'txn006', date: '2025-11-25', itemCode: 'TOP001', subcode: 'TOP001-RB', category: 'Toys', name: 'Spinning Top', qty: 1, actualPrice: 150, sellingPrice: 280, total: 280 }
+        ],
+        '2025-12': [
+            { id: 'txn007', date: '2025-12-02', itemCode: 'MINI001', subcode: 'MINI001-UNI', category: 'Toys', name: 'Mini Figurine', qty: 4, actualPrice: 40, sellingPrice: 99, total: 396 },
+            { id: 'txn008', date: '2025-12-05', itemCode: 'PART001', subcode: 'PART001-ALU', category: 'Prototypes', name: 'Mechanical Part', qty: 1, actualPrice: 350, sellingPrice: 600, total: 600 },
+            { id: 'txn009', date: '2025-12-10', itemCode: 'DEC001', subcode: 'DEC001-GLD', category: 'Home Decor', name: 'Home Decor Piece', qty: 1, actualPrice: 150, sellingPrice: 320, total: 320 },
+            { id: 'txn010', date: '2025-12-15', itemCode: 'EDU001', subcode: 'EDU001-ADV', category: 'Educational Kits', name: 'Educational Build Kit', qty: 1, actualPrice: 400, sellingPrice: 750, total: 750 },
+            { id: 'txn011', date: '2025-12-18', itemCode: 'TOP001', subcode: 'TOP001-BLU', category: 'Toys', name: 'Spinning Top', qty: 2, actualPrice: 80, sellingPrice: 150, total: 300 }
+        ],
+        '2026-01': [
+            { id: 'txn012', date: '2026-01-03', itemCode: 'MINI001', subcode: 'MINI001-PHX', category: 'Toys', name: 'Mini Figurine', qty: 2, actualPrice: 50, sellingPrice: 120, total: 240 },
+            { id: 'txn013', date: '2026-01-08', itemCode: 'DEC001', subcode: 'DEC001-BLK', category: 'Home Decor', name: 'Home Decor Piece', qty: 3, actualPrice: 120, sellingPrice: 250, total: 750 },
+            { id: 'txn014', date: '2026-01-12', itemCode: 'PART001', subcode: 'PART001-ST', category: 'Prototypes', name: 'Mechanical Part', qty: 1, actualPrice: 450, sellingPrice: 750, total: 750 },
+            { id: 'txn015', date: '2026-01-15', itemCode: 'TOP001', subcode: 'TOP001-GRE', category: 'Toys', name: 'Spinning Top', qty: 1, actualPrice: 80, sellingPrice: 150, total: 150 }
+        ]
+    },
+    oneTimeExpenses: [
+        { id: 'exp001', type: 'Machine', amount: 50000, date: '2025-10-01', description: '3D Printer - Creality Ender Max (High capacity FDM printer)' },
+        { id: 'exp002', type: 'Machine', amount: 15000, date: '2025-10-15', description: 'Anycubic Photon Mono 2 (Resin printer for detailed prints)' },
+        { id: 'exp003', type: 'Material', amount: 8000, date: '2025-11-01', description: 'Filament Stock - 25kg bundle (PLA, ABS, PETG)' },
+        { id: 'exp004', type: 'Material', amount: 5000, date: '2025-11-10', description: 'Resin Stock - 10L UV Resin for detailed prints' },
+        { id: 'exp005', type: 'Maintenance', amount: 2000, date: '2025-11-20', description: 'Printer maintenance - nozzles, bed leveling kit, cleaning' },
+        { id: 'exp006', type: 'Utilities', amount: 3000, date: '2025-12-01', description: 'Monthly electricity bill for November' },
+        { id: 'exp007', type: 'Packaging', amount: 2500, date: '2025-12-05', description: 'Packaging materials - boxes, bubble wrap, padding' },
+        { id: 'exp008', type: 'Marketing', amount: 1500, date: '2025-12-10', description: 'Social media marketing and promotional materials' },
+        { id: 'exp009', type: 'Utilities', amount: 3000, date: '2026-01-01', description: 'Monthly electricity bill for December' },
+        { id: 'exp010', type: 'Material', amount: 4000, date: '2026-01-05', description: 'Additional filament - specialized colors and types' }
+    ],
+    backups: []
+};
