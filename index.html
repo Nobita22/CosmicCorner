@@ -1,39 +1,3663 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coming Soon</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #7e8995ff, #c2b9c9ff);
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-    .container {
-      max-width: 600px;
-    }
-    h1 {
-      font-size: 4em;
-      margin-bottom: 20px;
-    }
-    p {
-      font-size: 1.5em;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Cosmic Corner Book</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ==================== FIX SCROLLING ISSUES ==================== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,.2);
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #app {
+            position: relative;
+            z-index: 1;
+            background: transparent;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow-x: hidden;
+        }
+
+        /* ==================== APP HEADER ==================== */
+        .app-header {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border-bottom: 1px solid #333333;
+            padding: 0.75rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+        }
+
+        /* Hamburger Button */
+        .hamburger-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #333333;
+            color: #ffffff;
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            margin-right: 15px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #444444;
+            transform: translateY(-2px);
+        }
+
+        .hamburger-btn:active {
+            transform: translateY(0);
+        }
+
+        .hamburger-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #666666;
+        }
+
+        .hamburger-btn.active i {
+            transform: rotate(90deg);
+        }
+
+        .hamburger-btn i {
+            transition: transform 0.3s ease-out;
+        }
+
+        /* Logo and Brand */
+        .logo-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .logo-img {
+            height: 45px;
+            width: 45px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #333333;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 0.8rem;
+            color: #aaaaaa;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* ==================== SIDEBAR NAVIGATION ==================== */
+        .sidebar-nav {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100vh;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border-right: 1px solid #333333;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-nav.show {
+            left: 0;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #333333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 15, 15, 0.8);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.5rem 0;
+        }
+
+        .sidebar-logo-img {
+            height: 40px;
+            width: 40px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #333333;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+        }
+
+        .sidebar-brand h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .sidebar-brand small {
+            font-size: 0.75rem;
+            color: #888888;
+            font-weight: 400;
+        }
+
+        .sidebar-close {
+            background: transparent;
+            border: none;
+            color: #cccccc;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-close:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin: 0;
+            padding: 0;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .sidebar-item:nth-child(1) { animation-delay: 0.1s; }
+        .sidebar-item:nth-child(2) { animation-delay: 0.15s; }
+        .sidebar-item:nth-child(3) { animation-delay: 0.2s; }
+        .sidebar-item:nth-child(4) { animation-delay: 0.25s; }
+        .sidebar-item:nth-child(5) { animation-delay: 0.3s; }
+        .sidebar-item:nth-child(6) { animation-delay: 0.35s; }
+        .sidebar-item:nth-child(7) { animation-delay: 0.4s; }
+        .sidebar-item:nth-child(8) { animation-delay: 0.45s; }
+        .sidebar-item:nth-child(9) { animation-delay: 0.5s; }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1.5rem;
+            color: #cccccc;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: #666666;
+        }
+
+        .sidebar-link.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+            border-left-color: #ffffff;
+            font-weight: 600;
+        }
+
+        .sidebar-link i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: #333333;
+            margin: 1rem 1.5rem;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid #333333;
+            background: rgba(15, 15, 15, 0.8);
+            padding: 1rem;
+            color: #888888;
+            font-size: 0.85rem;
+        }
+
+        /* ==================== MAIN CONTAINER ==================== */
+        .main-container {
+            flex: 1;
+            padding: 1.5rem 0.75rem;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            min-height: calc(100vh - 90px);
+            overflow-x: hidden;
+        }
+
+        /* ==================== CARDS & SURFACES - GLASSMORPHISM ==================== */
+        .card, .modal-content {
+            background: rgba(10, 10, 10, 0.6) !important;
+            border: 1px solid #333333;
+            color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-x: hidden;
+        }
+
+        .card:hover {
+            border-color: #444444;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            background: rgba(15, 15, 15, 0.8);
+            border-bottom: 1px solid #333333;
+            border-radius: 11px 11px 0 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* ==================== FORMS & INPUTS ==================== */
+        .form-control, .form-select {
+            background: rgba(15, 15, 15, 0.7);
+            color: #ffffff;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            font-size: 16px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .form-control::placeholder {
+            color: #888888;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(20, 20, 20, 0.8);
+            color: #ffffff;
+            border-color: #555555;
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+        }
+
+        .form-label {
+            color: #e0e0e0;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+        }
+
+        /* ==================== BUTTONS ==================== */
+        .btn {
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #333333;
+            font-size: 0.95rem;
+            padding: 0.6rem 1.2rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border-color: #444444;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #666666;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(40, 40, 40, 0.7);
+            color: #ffffff;
+            border: 1px solid #333333;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(50, 50, 50, 0.8);
+            border-color: #444444;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-light {
+            border: 1px solid #555555;
+            color: #ffffff;
+            background: transparent;
+        }
+
+        .btn-outline-light:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #777777;
+        }
+
+        .btn-danger {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(244, 67, 54, 0.3);
+            border-color: rgba(244, 67, 54, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-qr-scanner {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid #444444;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .btn-qr-scanner:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #666666;
+            transform: translateY(-2px);
+        }
+
+        .btn-qr-scanner:active {
+            transform: translateY(0);
+        }
+
+        /* ==================== MODALS - FULLY RESPONSIVE ==================== */
+        .modal-dialog {
+            max-width: 95vw;
+        }
+
+        .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #333333;
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #333333;
+            padding: 1.5rem;
+            background: rgba(10, 10, 10, 0.8);
+        }
+
+        .modal-footer {
+            border-top: 1px solid #333333;
+            padding: 1.5rem;
+            background: rgba(10, 10, 10, 0.6);
+        }
+
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .modal-dialog {
+                margin: 0.5rem;
+                max-width: calc(100vw - 1rem);
+            }
+
+            .modal-body {
+                max-height: calc(85vh - 150px);
+                overflow-y: auto;
+                padding: 1.25rem;
+            }
+
+            .modal-footer {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .modal-footer .btn {
+                flex: 1;
+                min-width: 100px;
+                font-size: 0.85rem;
+                padding: 0.5rem 0.8rem;
+            }
+        }
+
+        /* ==================== IMAGE UPLOAD ==================== */
+        .image-upload-area {
+            border: 2px dashed #333333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(15, 15, 15, 0.5);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .image-upload-area:hover {
+            border-color: #555555;
+            background: rgba(20, 20, 20, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .image-upload-area i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #888888;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            margin-top: 0.75rem;
+            border: 1px solid #333333;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+        }
+
+        .image-upload-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .image-upload-buttons button {
+            flex: 1;
+            min-width: 90px;
+            font-size: 0.8rem;
+            padding: 0.5rem 0.8rem;
+        }
+
+        /* ==================== TABLES ==================== */
+        .table {
+            color: #ffffff;
+            border-color: #333333;
+            font-size: 0.9rem;
+        }
+
+        .table thead {
+            background: rgba(20, 20, 20, 0.9);
+            color: #ffffff;
+            border-bottom: 1px solid #333333;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .table tbody tr {
+            border-color: #333333;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+        }
+
+        .table td, .table th {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-color: #333333 !important;
+        }
+
+        .table-responsive {
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ==================== METRIC CARDS - GLASSMORPHISM ==================== */
+        .metric-card {
+            cursor: pointer;
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid #333333;
+            color: #ffffff;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+        }
+
+        .metric-card:hover {
+            border-color: #444444;
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            color: #ffffff;
+            opacity: 0.9;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            letter-spacing: -0.5px;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #aaaaaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* ==================== CHARTS ==================== */
+        .chart-container {
+            position: relative;
+            height: 350px;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(10, 10, 10, 0.6);
+            border-radius: 12px;
+            border: 1px solid #333333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            width: 100%;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 280px;
+                padding: 1rem;
+            }
+        }
+
+        /* ==================== PAGINATION ==================== */
+        .pagination {
+            justify-content: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+        }
+
+        .page-link {
+            background: rgba(20, 20, 20, 0.7);
+            color: #cccccc;
+            border-color: #333333;
+            font-size: 0.9rem;
+            padding: 0.5rem 0.8rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .page-link:hover {
+            background: rgba(30, 30, 30, 0.8);
+            color: #ffffff;
+            border-color: #444444;
+        }
+
+        .page-item.active .page-link {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border-color: #555555;
+        }
+
+        /* ==================== STATUS BADGES ==================== */
+        .badge {
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border: 1px solid;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .badge-success {
+            background: rgba(76, 175, 80, 0.15);
+            color: #81c784;
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .badge-danger {
+            background: rgba(244, 67, 54, 0.15);
+            color: #ef5350;
+            border-color: rgba(244, 67, 54, 0.3);
+        }
+
+        /* ==================== EXPANDABLE ROWS ==================== */
+        .expandable-row {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .expandable-row.expanded {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .expansion-icon {
+            transition: transform 0.3s;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        .expandable-row.expanded .expansion-icon {
+            transform: rotate(180deg);
+        }
+
+        .expandable-details {
+            background: rgba(15, 15, 15, 0.8);
+            border-top: 1px solid #333333;
+            padding: 1rem;
+            margin-top: 0.75rem;
+            border-radius: 8px;
+            animation: slideDown 0.3s ease-out;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ==================== SEARCH & FILTER ==================== */
+        .search-input {
+            position: relative;
+        }
+
+        .search-input input {
+            padding-left: 2.5rem;
+        }
+
+        .search-input i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888888;
+            pointer-events: none;
+        }
+
+        /* ==================== RESPONSIVE GRID ==================== */
+        .responsive-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: 1fr;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .responsive-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .responsive-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .responsive-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* ==================== QR RESULT OVERLAY ==================== */
+        .qr-result-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid #333333;
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            z-index: 10000;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .qr-result-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .qr-result-code {
+            font-size: 0.9rem;
+            color: #aaaaaa;
+            margin-bottom: 0.3rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .qr-result-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .qr-result-buttons .btn {
+            min-width: 140px;
+        }
+
+        @media (max-width: 480px) {
+            .qr-result-overlay {
+                padding: 1.5rem 1rem;
+                max-width: 95%;
+            }
+
+            .qr-result-title {
+                font-size: 1.3rem;
+            }
+
+            .qr-result-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .qr-result-buttons .btn {
+                width: 100%;
+            }
+        }
+
+        /* ==================== TOAST NOTIFICATIONS ==================== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid #333333;
+            color: #ffffff;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 1rem 1.5rem;
+            animation: slideIn 0.3s ease-out;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid #4caf50;
+        }
+
+        .toast.error {
+            border-left: 4px solid #f44336;
+        }
+
+        .toast.warning {
+            border-left: 4px solid #ff9800;
+        }
+
+        /* ==================== UTILITY CLASSES ==================== */
+        .text-muted {
+            color: #888888 !important;
+        }
+
+        .text-danger {
+            color: #ef5350 !important;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ==================== ANIMATIONS ==================== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        /* ==================== RESPONSIVE ADJUSTMENTS ==================== */
+        @media (max-width: 480px) {
+            .brand-name {
+                font-size: 1.1rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .brand-subtitle {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-size: 0.7rem;
+            }
+
+            .metric-card {
+                min-height: 110px;
+                padding: 1rem;
+            }
+
+            .metric-icon {
+                font-size: 1.6rem;
+            }
+
+            .metric-value {
+                font-size: 1.2rem;
+            }
+
+            .metric-label {
+                font-size: 0.7rem;
+            }
+
+            .chart-container {
+                height: 250px;
+                padding: 0.75rem;
+            }
+
+            .card-body {
+                padding: 0.75rem;
+            }
+
+            .btn {
+                padding: 0.45rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .table {
+                font-size: 0.7rem;
+            }
+
+            .table th, .table td {
+                padding: 0.5rem;
+            }
+
+            .main-container {
+                padding: 1rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .app-header {
+                padding: 0.75rem;
+            }
+
+            .logo-brand {
+                gap: 12px;
+            }
+
+            .logo-img {
+                height: 40px;
+                width: 40px;
+            }
+
+            .brand-name {
+                font-size: 1.2rem;
+            }
+
+            .hamburger-btn {
+                width: 40px;
+                height: 40px;
+                margin-right: 12px;
+            }
+
+            .main-container {
+                padding-top: 1rem;
+                min-height: calc(100vh - 80px);
+            }
+
+            .sidebar-nav {
+                width: 85%;
+                max-width: 300px;
+            }
+
+            .sidebar-link {
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .sidebar-header {
+                padding: 1.25rem;
+            }
+            
+            .container-fluid {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .main-container {
+                padding: 2.5rem 1.5rem;
+                min-height: calc(100vh - 90px);
+            }
+
+            .brand-name {
+                font-size: 1.5rem;
+            }
+
+            .brand-subtitle {
+                font-size: 0.85rem;
+            }
+
+            .logo-img {
+                height: 50px;
+                width: 50px;
+            }
+
+            .sidebar-nav {
+                left: 0;
+                width: 250px;
+                top: 90px;
+                height: calc(100vh - 90px);
+                background: rgba(10, 10, 10, 0.85);
+                backdrop-filter: blur(20px) saturate(180%);
+            }
+
+            .sidebar-overlay {
+                display: none;
+            }
+
+            .main-container {
+                margin-left: 250px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .main-container {
+                margin-left: 250px;
+            }
+            
+            .sidebar-nav {
+                width: 250px;
+            }
+        }
+
+        /* ==================== PRINT STYLES ==================== */
+        @media print {
+            body::before {
+                display: none;
+            }
+
+            .app-header,
+            .hamburger-btn,
+            .sidebar-nav,
+            .btn-qr-scanner {
+                display: none;
+            }
+
+            .main-container {
+                padding: 0;
+                margin-left: 0;
+            }
+
+            .card {
+                box-shadow: none;
+                border: 1px solid #000000;
+            }
+        }
+
+        /* ==================== SCROLLBAR STYLING ==================== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(20, 20, 20, 0.5);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* ==================== LOGO ANIMATION ==================== */
+        @keyframes logoGlow {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+                transform: scale(1.02);
+            }
+        }
+
+        .logo-img:hover {
+            animation: logoGlow 2s infinite;
+        }
+
+        /* ==================== FIX FOR PAGE CONTENT ==================== */
+        #page-content {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Fix for horizontal scroll on mobile */
+        @media (max-width: 768px) {
+            body, html, #app, .main-container {
+                max-width: 100vw;
+                overflow-x: hidden;
+            }
+            
+            .container-fluid {
+                max-width: 100%;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Coming Soon</h1>
-    <p>We’re working hard to launch our website. Stay tuned!</p>
-  </div>
+    <div id="app">
+        <!-- HEADER WITH LOGO, NAME & HAMBURGER -->
+        <header class="app-header">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    <!-- Hamburger Menu Button -->
+                    <button class="hamburger-btn" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <!-- Logo and Name -->
+                    <div class="logo-brand" onclick="navigate('home'); return false;">
+                        <img src="logo.png" alt="Cosmic Corner" class="logo-img">
+                        <div class="brand-text">
+                            <h1 class="brand-name">Cosmic Corner Book</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- SIDEBAR NAVIGATION -->
+        <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <nav id="sidebar" class="sidebar-nav">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="logo.png" alt="Cosmic Corner" class="sidebar-logo-img">
+                    <div class="sidebar-brand">
+                        <h3>Cosmic Corner</h3>
+                        <small>Book V1</small>
+                    </div>
+                </div>
+                <button class="sidebar-close" onclick="toggleSidebar()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#" onclick="navigate('home'); toggleSidebar(); return false;">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#" onclick="navigate('inventory'); toggleSidebar(); return false;">
+                            <i class="fas fa-boxes"></i> Inventory
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#" onclick="navigate('ledger'); toggleSidebar(); return false;">
+                            <i class="fas fa-book"></i> Ledger
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#" onclick="navigate('analytics'); toggleSidebar(); return false;">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#" onclick="navigate('budget'); toggleSidebar(); return false;">
+                            <i class="fas fa-wallet"></i> Budget
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#" onclick="openDataManagement(); toggleSidebar(); return false;">
+                            <i class="fas fa-database"></i> Data
+                        </a>
+                    </li>
+                    
+                    <li class="sidebar-divider"></li>
+                    
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#" onclick="openQRGeneratorMenu(); toggleSidebar(); return false;">
+                            <i class="fas fa-qrcode"></i> Generate QR
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="#" onclick="openQRScanner(); toggleSidebar(); return false;">
+                            <i class="fas fa-camera"></i> Scan QR
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div style="padding: 1rem; color: #888888; font-size: 0.85rem;">
+                    <small>v1.0 • Managed by: <strong id="userName">Sameer</strong></small>
+                </div>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-container">
+            <div id="page-content"></div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ==================== SIDEBAR FUNCTIONS ====================
+        let isSidebarOpen = false;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            isSidebarOpen = !isSidebarOpen;
+            
+            if (sidebar) {
+                if (isSidebarOpen) {
+                    sidebar.classList.add('show');
+                    if (overlay) overlay.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    // Add active state to hamburger button
+                    document.querySelector('.hamburger-btn').classList.add('active');
+                } else {
+                    sidebar.classList.remove('show');
+                    if (overlay) overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                    // Remove active state from hamburger button
+                    document.querySelector('.hamburger-btn').classList.remove('active');
+                }
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            isSidebarOpen = false;
+            if (sidebar) sidebar.classList.remove('show');
+            if (overlay) overlay.classList.remove('show');
+            document.body.style.overflow = '';
+            
+            // Remove active state from hamburger button
+            const hamburgerBtn = document.querySelector('.hamburger-btn');
+            if (hamburgerBtn) {
+                hamburgerBtn.classList.remove('active');
+            }
+        }
+
+        // ======================== COMPREHENSIVE GLOBAL STATE ========================
+        let appData = {
+            version: 1,
+            inventory: [],
+            transactions: {},
+            oneTimeExpenses: [],
+            budgets: [],
+            backups: [],
+            settings: {
+                theme: 'dark',
+                currency: '₹',
+                dateFormat: 'YYYY-MM-DD'
+            }
+        };
+
+        let currentPage = 'home';
+        let currentFilters = {
+            inventoryPage: 1,
+            ledgerPage: 1,
+            searchQuery: '',
+            sortBy: 'name',
+            category: 'all',
+            year: new Date().getFullYear(),
+            month: new Date().getMonth() + 1,
+            expenseType: 'all'
+        };
+
+        let charts = {
+            revenue: null,
+            profit: null,
+            category: null,
+            topProducts: null
+        };
+
+        let qrScanner = null;
+        let isScannerActive = false;
+        let editingProductCode = null;
+        let imageFiles = {
+            main: null,
+            variants: {}
+        };
+
+        // ======================== INITIALIZATION ========================
+        async function init() {
+            console.log('Initializing Cosmic Corner V1...');
+            await loadData();
+            initializeEventListeners();
+            navigate('home');
+            
+            // Set your name in sidebar footer
+            const yourName = "Sameer";
+            const footer = document.getElementById('userName');
+            if (footer) {
+                footer.textContent = yourName;
+            }
+            
+            // Fix any initial scroll issues
+            setTimeout(fixScrollIssues, 100);
+        }
+
+        function initializeEventListeners() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeAllModals();
+                }
+            });
+            
+            // Close sidebar when clicking on overlay
+            const overlay = document.getElementById('sidebarOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+            
+            // Prevent body scroll when sidebar is open
+            document.addEventListener('scroll', function() {
+                if (isSidebarOpen && window.innerWidth < 768) {
+                    window.scrollTo(0, 0);
+                }
+            });
+        }
+
+        // ======================== NAVIGATION ========================
+        function navigate(page) {
+            currentPage = page;
+            document.getElementById('page-content').innerHTML = '';
+            
+            // Close sidebar on mobile
+            if (window.innerWidth < 768) {
+                closeSidebar();
+            }
+            
+            // Update active sidebar link
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Find and activate current sidebar link
+            const activeLink = document.querySelector(`.sidebar-link[onclick*="${page}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+            
+            switch (page) {
+                case 'home':
+                    renderHome();
+                    break;
+                case 'inventory':
+                    renderInventory();
+                    break;
+                case 'ledger':
+                    renderLedger();
+                    break;
+                case 'analytics':
+                    renderAnalytics();
+                    break;
+                case 'budget':
+                    renderBudget();
+                    break;
+            }
+            
+            window.scrollTo(0, 0);
+            setTimeout(fixScrollIssues, 100);
+        }
+
+        // ======================== DATA MANAGEMENT ========================
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) {
+                    // If file doesn't exist, create with sample data
+                    appData = getSampleData();
+                    await saveData();
+                    showToast('Created new data.json with sample data', 'success');
+                } else {
+                    const data = await response.json();
+                    // Merge with existing appData to ensure all properties exist
+                    appData = { ...appData, ...data };
+                    console.log('Data loaded successfully:', appData.inventory.length + ' products');
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                appData = getSampleData();
+                showToast('Error loading data.json. Using sample data.', 'error');
+            }
+        }
+
+        async function saveData() {
+            try {
+                // Create backup entry
+                const backup = {
+                    timestamp: new Date().toISOString(),
+                    data: JSON.parse(JSON.stringify(appData))
+                };
+                appData.backups.push(backup);
+                if (appData.backups.length > 10) appData.backups.shift();
+                
+                // Save using server endpoint
+                await saveDataToServer();
+                showToast('Data saved successfully', 'success');
+            } catch (error) {
+                console.error('Error saving:', error);
+                // Fallback: download JSON file
+                downloadDataAsFile();
+            }
+        }
+
+        async function saveDataToServer() {
+            try {
+                const response = await fetch('/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(appData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Server save failed');
+                }
+                
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.error || 'Save failed');
+                }
+                
+                return true;
+            } catch (error) {
+                console.log('Server save failed:', error);
+                throw error;
+            }
+        }
+
+        async function uploadImage(file, productCode, variantCode = null) {
+            if (!file) return null;
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('productCode', productCode);
+            if (variantCode) {
+                formData.append('variantCode', variantCode);
+            }
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Image upload failed');
+                }
+                
+                const result = await response.json();
+                return result.filename;
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                showToast('Error uploading image', 'error');
+                return null;
+            }
+        }
+
+        function getImageUrl(filename) {
+            if (!filename) return '';
+            return `/ProductsImages/${filename}`;
+        }
+
+        function downloadDataAsFile() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Data downloaded as data.json. Please save it in your CC folder.', 'warning');
+        }
+
+        function getSampleData() {
+            return {
+                version: 4,
+                inventory: [
+                    {
+                        code: 'TOP001',
+                        name: 'Spinning Top',
+                        category: 'Toys',
+                        description: 'Fun spinning toy for kids and adults',
+                        image: '',
+                        subtypes: [
+                            { subcode: 'TOP001-R', color: 'Red', qty: 10, actualPrice: 100, sellingPrice: 200, image: '' },
+                            { subcode: 'TOP001-B', color: 'Blue', qty: 15, actualPrice: 100, sellingPrice: 200, image: '' },
+                            { subcode: 'TOP001-G', color: 'Gold', qty: 8, actualPrice: 120, sellingPrice: 250, image: '' }
+                        ]
+                    },
+                    {
+                        code: 'PROTO001',
+                        name: 'Model Prototype',
+                        category: 'Prototypes',
+                        description: 'Professional prototype model',
+                        image: '',
+                        subtypes: [
+                            { subcode: 'PROTO001-S', color: 'Standard', qty: 15, actualPrice: 500, sellingPrice: 1200, image: '' },
+                            { subcode: 'PROTO001-L', color: 'Large', qty: 5, actualPrice: 800, sellingPrice: 1800, image: '' }
+                        ]
+                    }
+                ],
+                transactions: {
+                    '2026-01': [
+                        { id: 'txn1', date: '2026-01-02', itemCode: 'TOP001', subcode: 'TOP001-R', category: 'Toys', name: 'Spinning Top', qty: 2, actualPrice: 100, sellingPrice: 200, total: 400 },
+                        { id: 'txn2', date: '2026-01-03', itemCode: 'PROTO001', subcode: 'PROTO001-S', category: 'Prototypes', name: 'Model Prototype', qty: 1, actualPrice: 500, sellingPrice: 1200, total: 1200 }
+                    ]
+                },
+                oneTimeExpenses: [
+                    { id: 'exp1', type: 'Machine', amount: 50000, date: '2025-11-15', description: '3D Printer Ultimaker S5' },
+                    { id: 'exp2', type: 'Maintenance', amount: 5000, date: '2025-12-01', description: 'Nozzle replacement & cleaning' }
+                ],
+                budgets: [],
+                backups: []
+            };
+        }
+
+        // ======================== QR SCANNER ========================
+        function openQRScanner() {
+            const html = `
+                <div class="modal fade" id="qrScannerModal" tabindex="-1" data-bs-backdrop="static">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-qrcode"></i> QR Code Scanner
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopQRScanner()"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div style="color: #aaaaaa; text-align: center; margin-bottom: 1.5rem; font-size: 0.95rem;">
+                                    <i class="fas fa-camera" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                                    Position QR code in the frame below
+                                </div>
+                                <div id="qr-reader" style="width: 100%;"></div>
+                                <div style="margin-top: 1rem; text-align: center;">
+                                    <small style="color: #888888;">Scanning in progress...</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = html;
+            document.body.appendChild(modalContainer);
+
+            const modal = new bootstrap.Modal(document.getElementById('qrScannerModal'));
+            modal.show();
+
+            isScannerActive = true;
+            qrScanner = new Html5Qrcode("qr-reader");
+            
+            qrScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    handleQRResult(decodedText);
+                    stopQRScanner();
+                },
+                (errorMessage) => {}
+            ).catch(err => {
+                showToast('Camera access denied. Please allow camera permission.', 'error');
+            });
+        }
+
+        function stopQRScanner() {
+            if (qrScanner && isScannerActive) {
+                qrScanner.stop().then(() => {
+                    qrScanner.clear();
+                    isScannerActive = false;
+                }).catch(err => console.log('Stop error:', err));
+            }
+        }
+
+        function handleQRResult(qrText) {
+            const product = appData.inventory.find(p => 
+                p.code === qrText || p.subtypes.some(s => s.subcode === qrText)
+            );
+            
+            if (product) {
+                showQRResultDialog(qrText, product);
+            } else {
+                showToast('Product not found in inventory', 'error');
+            }
+        }
+
+        function showQRResultDialog(qrText, product) {
+            let subtype = null;
+            if (qrText !== product.code) {
+                subtype = product.subtypes.find(s => s.subcode === qrText);
+            }
+
+            const html = `
+                <div class="qr-result-overlay" id="qrResultOverlay">
+                    <div class="qr-result-title">✓ ${product.name}</div>
+                    <div class="qr-result-code">Code: ${qrText}</div>
+                    ${subtype ? `<div class="qr-result-code">Color: ${subtype.color}</div>` : ''}
+                    <div style="margin-top: 1rem; font-size: 0.85rem; color: #999999;">
+                        ${subtype ? `Available: ${subtype.qty} units` : `Total Variants: ${product.subtypes.length}`}
+                    </div>
+                    <div class="qr-result-buttons">
+                        <button class="btn btn-primary" onclick="proceedToSell('${product.code}', '${subtype ? subtype.subcode : product.code}')">
+                            <i class="fas fa-shopping-cart"></i> Sell
+                        </button>
+                        <button class="btn btn-secondary" onclick="proceedToInventory('${product.code}')">
+                            <i class="fas fa-plus"></i> Add Stock
+                        </button>
+                        <button class="btn btn-outline-light" onclick="closeQRResult()">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        function closeQRResult() {
+            const overlay = document.getElementById('qrResultOverlay');
+            if (overlay) {
+                overlay.style.animation = 'popIn 0.3s ease-out reverse';
+                setTimeout(() => overlay.remove(), 300);
+            }
+        }
+
+        function proceedToSell(productCode, subcode) {
+            closeQRResult();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('qrScannerModal'));
+            if (modal) modal.hide();
+            
+            navigate('ledger');
+            setTimeout(() => {
+                if (document.getElementById('txnProduct')) {
+                    document.getElementById('txnProduct').value = productCode;
+                    document.getElementById('txnProduct').dispatchEvent(new Event('change'));
+                }
+            }, 300);
+        }
+
+        function proceedToInventory(productCode) {
+            closeQRResult();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('qrScannerModal'));
+            if (modal) modal.hide();
+            navigate('inventory');
+        }
+
+        // ======================== HOME PAGE ========================
+        function renderHome() {
+            const totalProfit = calculateTotalProfit();
+            const inventoryValue = calculateInventoryValue();
+            const currentMonthRevenue = calculateMonthlyRevenue(new Date().getFullYear(), new Date().getMonth() + 1);
+            const totalRevenue = Object.values(appData.transactions).flat().reduce((sum, t) => sum + t.total, 0);
+            const totalBudget = (appData.budgets || []).reduce((sum, b) => sum + b.amount, 0);
+            const netWorth = totalProfit - totalBudget;
+
+            const html = `
+                <div class="container-fluid">
+                    <div class="responsive-grid mb-5">
+                        <div class="metric-card fade-in-up" onclick="navigate('analytics')" style="animation-delay: 0s;">
+                            <div class="metric-icon"><i class="fas fa-chart-pie"></i></div>
+                            <div class="metric-value">₹${totalProfit.toLocaleString()}</div>
+                            <div class="metric-label">Total Profit</div>
+                        </div>
+                        <div class="metric-card fade-in-up" onclick="navigate('inventory')" style="animation-delay: 0.1s;">
+                            <div class="metric-icon"><i class="fas fa-boxes"></i></div>
+                            <div class="metric-value">₹${inventoryValue.toLocaleString()}</div>
+                            <div class="metric-label">Inventory Value</div>
+                        </div>
+                        <div class="metric-card fade-in-up" onclick="navigate('ledger')" style="animation-delay: 0.2s;">
+                            <div class="metric-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="metric-value">₹${currentMonthRevenue.toLocaleString()}</div>
+                            <div class="metric-label">This Month</div>
+                        </div>
+                        <div class="metric-card fade-in-up" onclick="navigate('budget')" style="animation-delay: 0.3s;">
+                            <div class="metric-icon"><i class="fas fa-wallet"></i></div>
+                            <div class="metric-value ${netWorth >= 0 ? '' : 'text-danger'}">₹${netWorth.toLocaleString()}</div>
+                            <div class="metric-label">Net Worth</div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-6 col-md-3">
+                                    <button class="btn btn-primary w-100 btn-sm" onclick="openQRScanner()">
+                                        <i class="fas fa-camera"></i> Scan QR
+                                    </button>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <button class="btn btn-secondary w-100 btn-sm" onclick="navigate('inventory'); setTimeout(openAddProductModal, 300)">
+                                        <i class="fas fa-plus"></i> Product
+                                    </button>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <button class="btn btn-secondary w-100 btn-sm" onclick="navigate('ledger'); setTimeout(openAddTransactionModal, 300)">
+                                        <i class="fas fa-shopping-cart"></i> Sale
+                                    </button>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <button class="btn btn-secondary w-100 btn-sm" onclick="navigate('analytics')">
+                                        <i class="fas fa-chart-line"></i> Analytics
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Business Summary</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div style="padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 4px solid #4caf50;">
+                                        <div style="color: #aaaaaa; font-size: 0.85rem; margin-bottom: 0.3rem;">Total Revenue</div>
+                                        <div style="font-size: 1.3rem; font-weight: 700;">₹${totalRevenue.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div style="padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 4px solid #2196f3;">
+                                        <div style="color: #aaaaaa; font-size: 0.85rem; margin-bottom: 0.3rem;">Products Listed</div>
+                                        <div style="font-size: 1.3rem; font-weight: 700;">${appData.inventory.length}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div style="padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 4px solid #ff9800;">
+                                        <div style="color: #aaaaaa; font-size: 0.85rem; margin-bottom: 0.3rem;">Total Invested</div>
+                                        <div style="font-size: 1.3rem; font-weight: 700;">₹${totalBudget.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div style="padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 4px solid ${netWorth >= 0 ? '#4caf50' : '#f44336'};">
+                                        <div style="color: #aaaaaa; font-size: 0.85rem; margin-bottom: 0.3rem;">Net Worth</div>
+                                        <div style="font-size: 1.3rem; font-weight: 700; color: ${netWorth >= 0 ? '#4caf50' : '#f44336'};">₹${netWorth.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('page-content').innerHTML = html;
+        }
+
+        // ======================== CALCULATION FUNCTIONS ========================
+        function calculateTotalProfit() {
+            let totalRevenue = 0;
+            let totalCost = 0;
+
+            Object.values(appData.transactions).forEach(monthTxns => {
+                monthTxns.forEach(txn => {
+                    totalRevenue += txn.total;
+                    totalCost += txn.actualPrice * txn.qty;
+                });
+            });
+
+            const totalExpenses = appData.oneTimeExpenses.reduce((sum, e) => sum + e.amount, 0);
+            return totalRevenue - totalCost - totalExpenses;
+        }
+
+        function calculateInventoryValue() {
+            return appData.inventory.reduce((sum, p) => {
+                return sum + p.subtypes.reduce((pSum, s) => pSum + (s.qty * s.actualPrice), 0);
+            }, 0);
+        }
+
+        function calculateMonthlyRevenue(year, month) {
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            return (appData.transactions[monthKey] || []).reduce((sum, t) => sum + t.total, 0);
+        }
+
+        // ======================== INVENTORY PAGE ========================
+        function renderInventory() {
+            let filtered = appData.inventory;
+
+            if (currentFilters.searchQuery) {
+                const fuse = new Fuse(filtered, {
+                    keys: ['code', 'name', 'category', 'description'],
+                    threshold: 0.3
+                });
+                filtered = fuse.search(currentFilters.searchQuery).map(r => r.item);
+            }
+
+            if (currentFilters.category !== 'all') {
+                filtered = filtered.filter(p => p.category === currentFilters.category);
+            }
+
+            filtered.sort((a, b) => {
+                if (currentFilters.sortBy === 'name') return a.name.localeCompare(b.name);
+                if (currentFilters.sortBy === 'code') return a.code.localeCompare(b.code);
+                if (currentFilters.sortBy === 'category') return a.category.localeCompare(b.category);
+                return 0;
+            });
+
+            const itemsPerPage = 5;
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const start = (currentFilters.inventoryPage - 1) * itemsPerPage;
+            const paginatedItems = filtered.slice(start, start + itemsPerPage);
+
+            const categories = [...new Set(appData.inventory.map(p => p.category))];
+
+            const html = `
+                <div class="container-fluid">
+                    <div class="row mb-3">
+                        <div class="col-auto">
+                            <button class="btn btn-secondary btn-sm" onclick="navigate('home')">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                        </div>
+                        <div class="col"></div>
+                        <div class="col-auto">
+                            <button class="btn btn-primary btn-sm" onclick="openAddProductModal()">
+                                <i class="fas fa-plus"></i> Add Product
+                            </button>
+                        </div>
+                    </div>
+
+                    <h2 class="mb-4"><i class="fas fa-boxes"></i> Inventory Management</h2>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row g-2 mb-3">
+                                <div class="col-12 col-md-6">
+                                    <div class="search-input">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" class="form-control form-control-sm" placeholder="Search products..." 
+                                            value="${currentFilters.searchQuery}" onkeyup="handleSearchInventory(this.value)">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <select class="form-select form-select-sm" onchange="handleCategoryFilter(this.value)">
+                                        <option value="all">All Categories</option>
+                                        ${categories.map(cat => `<option value="${cat}" ${currentFilters.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <select class="form-select form-select-sm" onchange="handleSortChange(this.value)">
+                                        <option value="name" ${currentFilters.sortBy === 'name' ? 'selected' : ''}>Sort: Name</option>
+                                        <option value="code" ${currentFilters.sortBy === 'code' ? 'selected' : ''}>Sort: Code</option>
+                                        <option value="category" ${currentFilters.sortBy === 'category' ? 'selected' : ''}>Sort: Category</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="inventoryList">
+                        ${paginatedItems.map((product) => {
+                            const totalQty = product.subtypes.reduce((sum, s) => sum + s.qty, 0);
+                            const totalValue = product.subtypes.reduce((sum, s) => sum + (s.qty * s.actualPrice), 0);
+                            const mainImageUrl = product.image ? getImageUrl(product.image) : '';
+                            
+                            return `
+                                <div class="card mb-2 expandable-row" id="product-${product.code}">
+                                    <div class="card-body p-3">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto" style="margin-right: 1rem;">
+                                                ${mainImageUrl ? `
+                                                    <img src="${mainImageUrl}" alt="${product.name}" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid #333333; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                                                ` : `
+                                                    <div style="width: 60px; height: 60px; background: rgba(20, 20, 20, 0.6); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid #333333; backdrop-filter: blur(10px);">
+                                                        <i class="fas fa-image" style="color: #666666; font-size: 1.5rem;"></i>
+                                                    </div>
+                                                `}
+                                            </div>
+                                            <div class="col">
+                                                <h6 class="mb-0 fw-bold">${product.name}</h6>
+                                                <small class="text-muted">${product.code} • ${product.category}</small>
+                                                ${product.description ? `<div style="font-size: 0.8rem; color: #999999; margin-top: 0.3rem;">${product.description}</div>` : ''}
+                                            </div>
+                                            <div class="col-auto text-end">
+                                                <div style="margin-bottom: 0.5rem;">
+                                                    <span class="badge badge-success">${totalQty} units</span>
+                                                    <span class="badge badge-warning">₹${totalValue.toLocaleString()}</span>
+                                                </div>
+                                                <button class="btn btn-sm btn-secondary" onclick="editProduct('${product.code}'); event.stopPropagation();" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="deleteProduct('${product.code}'); event.stopPropagation();" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                <span class="expansion-icon"><i class="fas fa-chevron-down"></i></span>
+                                            </div>
+                                        </div>
+                                        <div id="details-${product.code}" class="expandable-details" style="display:none; margin-top: 1rem;">
+                                            <h6 style="margin-bottom: 0.75rem;">Variants:</h6>
+                                            <div class="row g-2">
+                                                ${product.subtypes.map(s => {
+                                                    const variantImageUrl = s.image ? getImageUrl(s.image) : '';
+                                                    return `
+                                                    <div class="col-12 col-sm-6 col-md-4">
+                                                        <div style="background: rgba(255,255,255,0.03); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #444444; overflow: hidden; backdrop-filter: blur(10px);">
+                                                            <div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                                                ${variantImageUrl ? `
+                                                                    <img src="${variantImageUrl}" alt="${s.color}" style="width: 45px; height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid #333333; flex-shrink: 0;">
+                                                                ` : `
+                                                                    <div style="width: 45px; height: 45px; background: rgba(20, 20, 20, 0.6); border-radius: 6px; display: flex; align-items: center; justify-content: center; border: 1px solid #333333; flex-shrink: 0; backdrop-filter: blur(10px);">
+                                                                        <i class="fas fa-image" style="color: #777777; font-size: 0.9rem;"></i>
+                                                                    </div>
+                                                                `}
+                                                                <div style="flex: 1;">
+                                                                    <div style="font-weight: 600; font-size: 0.85rem;">${s.color}</div>
+                                                                    <small style="color: #999999;">Code: ${s.subcode}</small>
+                                                                </div>
+                                                            </div>
+                                                            <div style="font-size: 0.75rem; color: #aaaaaa;">
+                                                                <div>Qty: ${s.qty}</div>
+                                                                <div>Cost: ₹${s.actualPrice} | Sale: ₹${s.sellingPrice}</div>
+                                                                <div>Margin: ${((s.sellingPrice - s.actualPrice) / s.actualPrice * 100).toFixed(1)}%</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                `}).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+
+                        ${paginatedItems.length === 0 ? `
+                            <div class="card">
+                                <div class="card-body text-center py-5">
+                                    <i class="fas fa-inbox" style="font-size: 3rem; color: #444444; margin-bottom: 1rem; display: block;"></i>
+                                    <p style="color: #888888; margin: 0;">No products found</p>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${totalPages > 1 ? `
+                        <nav class="mt-4">
+                            <ul class="pagination">
+                                ${Array.from({length: totalPages}, (_, i) => i + 1).map(page => `
+                                    <li class="page-item ${page === currentFilters.inventoryPage ? 'active' : ''}">
+                                        <a class="page-link" href="#" onclick="handleInventoryPagination(${page}); return false;">${page}</a>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </nav>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('page-content').innerHTML = html;
+
+            // Add expandable row functionality
+            document.querySelectorAll('.expandable-row').forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (!e.target.closest('button')) {
+                        this.classList.toggle('expanded');
+                        const code = this.id.replace('product-', '');
+                        const details = document.getElementById(`details-${code}`);
+                        details.style.display = details.style.display === 'none' ? 'block' : 'none';
+                    }
+                });
+            });
+
+            renderAddProductModal();
+        }
+
+        function handleSearchInventory(query) {
+            currentFilters.searchQuery = query;
+            currentFilters.inventoryPage = 1;
+            renderInventory();
+        }
+
+        function handleCategoryFilter(category) {
+            currentFilters.category = category;
+            currentFilters.inventoryPage = 1;
+            renderInventory();
+        }
+
+        function handleSortChange(sortBy) {
+            currentFilters.sortBy = sortBy;
+            renderInventory();
+        }
+
+        function handleInventoryPagination(page) {
+            currentFilters.inventoryPage = page;
+            renderInventory();
+        }
+
+        function renderAddProductModal() {
+            const modal = `
+                <div class="modal fade" id="addProductModal" tabindex="-1" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-plus"></i> Add/Edit Product
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="clearProductForm()"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="productForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Product Code *</label>
+                                        <input type="text" class="form-control" id="productCode" placeholder="e.g., TOP001" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Product Name *</label>
+                                        <input type="text" class="form-control" id="productName" placeholder="e.g., Spinning Top" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Category *</label>
+                                        <input type="text" class="form-control" id="productCategory" placeholder="e.g., Toys" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Description</label>
+                                        <textarea class="form-control" id="productDescription" placeholder="Product description..." rows="2"></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Main Image</label>
+                                        <div class="image-upload-area" onclick="document.getElementById('mainImageInput').click()">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <div>Click to upload image</div>
+                                            <small>PNG, JPG (max 10MB)</small>
+                                        </div>
+                                        <input type="file" id="mainImageInput" accept="image/*" style="display:none;" onchange="handleMainImageUpload(event)">
+                                        <img id="mainImagePreview" class="image-preview" style="display:none;">
+                                    </div>
+
+                                    <hr style="border-color: #333333;">
+
+                                    <h6 class="mt-4 mb-3"><i class="fas fa-palette"></i> Subtypes/Variants</h6>
+                                    <div id="subtypesList"></div>
+                                    <button type="button" class="btn btn-secondary btn-sm w-100 mb-3" onclick="addSubtypeRow()">
+                                        <i class="fas fa-plus"></i> Add Variant
+                                    </button>
+
+                                    <div class="modal-footer mt-4">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="clearProductForm()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save Product</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('addProductModal');
+            if (!existingModal) {
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modal;
+                document.body.appendChild(modalContainer);
+            }
+
+            renderSubtypesList();
+            document.getElementById('productForm')?.addEventListener('submit', saveProduct);
+        }
+
+        function handleMainImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const maxSize = 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    showToast('File too large. Max 10MB.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+                
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    showToast('Invalid file type. Please upload JPG, PNG, or WebP images.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+                
+                imageFiles.main = file;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('mainImagePreview').src = e.target.result;
+                    document.getElementById('mainImagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderSubtypesList() {
+            const container = document.getElementById('subtypesList');
+            if (!container) return;
+            
+            const subtypes = JSON.parse(sessionStorage.getItem('tempSubtypes') || '[]');
+
+            if (subtypes.length === 0) {
+                container.innerHTML = '<div class="alert alert-info alert-sm mb-2" style="background: rgba(15, 15, 15, 0.6); border-color: #333333; color: #aaaaaa;">No variants. Click "Add Variant".</div>';
+                return;
+            }
+
+            container.innerHTML = subtypes.map((sub, idx) => `
+                <div class="card card-sm mb-2" style="background: rgba(15, 15, 15, 0.6); border-color: #333333;">
+                    <div class="card-body p-2">
+                        <div class="row g-1 mb-1">
+                            <div class="col-6">
+                                <label class="form-label mb-1" style="font-size: 0.75rem;">Subcode</label>
+                                <input type="text" class="form-control form-control-sm" value="${sub.subcode}" 
+                                    onchange="updateSubtype(${idx}, 'subcode', this.value)" placeholder="e.g., TOP001-R" required style="background: rgba(20, 20, 20, 0.7); border-color: #333333; color: white;">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label mb-1" style="font-size: 0.75rem;">Color/Name</label>
+                                <input type="text" class="form-control form-control-sm" value="${sub.color}" 
+                                    onchange="updateSubtype(${idx}, 'color', this.value)" placeholder="e.g., Red" required style="background: rgba(20, 20, 20, 0.7); border-color: #333333; color: white;">
+                            </div>
+                        </div>
+                        <div class="row g-1 mb-1">
+                            <div class="col-4">
+                                <label class="form-label mb-1" style="font-size: 0.75rem;">Qty</label>
+                                <input type="number" class="form-control form-control-sm" value="${sub.qty}" 
+                                    onchange="updateSubtype(${idx}, 'qty', parseInt(this.value))" placeholder="0" required min="0" style="background: rgba(20, 20, 20, 0.7); border-color: #333333; color: white;">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label mb-1" style="font-size: 0.75rem;">Cost</label>
+                                <input type="number" class="form-control form-control-sm" value="${sub.actualPrice}" 
+                                    onchange="updateSubtype(${idx}, 'actualPrice', parseInt(this.value))" placeholder="0" required min="0" style="background: rgba(20, 20, 20, 0.7); border-color: #333333; color: white;">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label mb-1" style="font-size: 0.75rem;">Price</label>
+                                <input type="number" class="form-control form-control-sm" value="${sub.sellingPrice}" 
+                                    onchange="updateSubtype(${idx}, 'sellingPrice', parseInt(this.value))" placeholder="0" required min="0" style="background: rgba(20, 20, 20, 0.7); border-color: #333333; color: white;">
+                            </div>
+                        </div>
+                        <div class="row g-1">
+                            <div class="col-12">
+                                <label class="form-label mb-1" style="font-size: 0.75rem;">Variant Image</label>
+                                <div class="image-upload-area" onclick="document.getElementById('variantImageInput${idx}').click()" style="min-height: 50px; padding: 0.5rem; background: rgba(15, 15, 15, 0.5);">
+                                    <i class="fas fa-image"></i> Upload
+                                </div>
+                                <input type="file" id="variantImageInput${idx}" accept="image/*" style="display:none;" onchange="handleVariantImageUpload(${idx}, event)">
+                                ${sub.image ? `<img id="variantImagePreview${idx}" class="image-preview" src="${getImageUrl(sub.image)}" style="max-height: 80px;">` : ''}
+                            </div>
+                        </div>
+                        <button class="btn btn-danger btn-sm w-100 mt-1" type="button" onclick="removeSubtype(${idx})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleVariantImageUpload(idx, event) {
+            const file = event.target.files[0];
+            if (file) {
+                const maxSize = 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    showToast('File too large. Max 10MB.', 'error');
+                    return;
+                }
+                
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    showToast('Invalid file type. Please upload JPG, PNG, or WebP images.', 'error');
+                    return;
+                }
+                
+                if (!imageFiles.variants[idx]) imageFiles.variants[idx] = {};
+                imageFiles.variants[idx].file = file;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const subtypes = JSON.parse(sessionStorage.getItem('tempSubtypes') || '[]');
+                    subtypes[idx].tempImage = e.target.result;
+                    sessionStorage.setItem('tempSubtypes', JSON.stringify(subtypes));
+                    
+                    let preview = document.getElementById(`variantImagePreview${idx}`);
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.id = `variantImagePreview${idx}`;
+                        preview.className = 'image-preview';
+                        preview.style.maxHeight = '80px';
+                        event.target.parentElement.appendChild(preview);
+                    }
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addSubtypeRow() {
+            const subtypes = JSON.parse(sessionStorage.getItem('tempSubtypes') || '[]');
+            const baseCode = document.getElementById('productCode')?.value || 'PROD';
+            const variantNum = subtypes.length + 1;
+            
+            subtypes.push({
+                subcode: `${baseCode}-V${variantNum}`,
+                color: 'Variant ' + variantNum,
+                qty: 0,
+                actualPrice: 0,
+                sellingPrice: 0,
+                image: ''
+            });
+            sessionStorage.setItem('tempSubtypes', JSON.stringify(subtypes));
+            renderSubtypesList();
+        }
+
+        function updateSubtype(idx, field, value) {
+            const subtypes = JSON.parse(sessionStorage.getItem('tempSubtypes') || '[]');
+            subtypes[idx][field] = value;
+            sessionStorage.setItem('tempSubtypes', JSON.stringify(subtypes));
+        }
+
+        function removeSubtype(idx) {
+            const subtypes = JSON.parse(sessionStorage.getItem('tempSubtypes') || '[]');
+            subtypes.splice(idx, 1);
+            sessionStorage.setItem('tempSubtypes', JSON.stringify(subtypes));
+            delete imageFiles.variants[idx];
+            renderSubtypesList();
+        }
+
+        async function editProduct(code) {
+            const product = appData.inventory.find(p => p.code === code);
+            if (!product) return;
+
+            document.getElementById('productCode').value = product.code;
+            document.getElementById('productCode').disabled = true;
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productCategory').value = product.category;
+            document.getElementById('productDescription').value = product.description || '';
+
+            if (product.image) {
+                const imageUrl = getImageUrl(product.image);
+                document.getElementById('mainImagePreview').src = imageUrl;
+                document.getElementById('mainImagePreview').style.display = 'block';
+            }
+
+            editingProductCode = code;
+            
+            const currentSubtypes = product.subtypes.map(sub => ({
+                ...sub,
+                tempImage: sub.image ? getImageUrl(sub.image) : ''
+            }));
+            sessionStorage.setItem('tempSubtypes', JSON.stringify(currentSubtypes));
+            
+            imageFiles.main = null;
+            imageFiles.variants = {};
+            
+            renderSubtypesList();
+
+            const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+            modal.show();
+        }
+
+        async function saveProduct(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const code = document.getElementById('productCode').value;
+            const name = document.getElementById('productName').value;
+            const category = document.getElementById('productCategory').value;
+            const description = document.getElementById('productDescription').value;
+            const subtypes = JSON.parse(sessionStorage.getItem('tempSubtypes') || '[]');
+
+            if (!code || !name || !category || subtypes.length === 0) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+
+            showToast('Saving product...', 'info');
+
+            try {
+                let mainImageFilename = '';
+                if (imageFiles.main) {
+                    mainImageFilename = await uploadImage(imageFiles.main, code, 'main');
+                } else {
+                    const existingProduct = appData.inventory.find(p => p.code === code);
+                    mainImageFilename = existingProduct?.image || '';
+                }
+
+                const updatedSubtypes = [];
+                for (let i = 0; i < subtypes.length; i++) {
+                    const sub = subtypes[i];
+                    let variantImageFilename = sub.image || '';
+                    
+                    if (imageFiles.variants[i]?.file) {
+                        variantImageFilename = await uploadImage(imageFiles.variants[i].file, code, sub.subcode);
+                    }
+                    
+                    updatedSubtypes.push({
+                        ...sub,
+                        image: variantImageFilename
+                    });
+                }
+
+                const productData = { 
+                    code, 
+                    name, 
+                    category, 
+                    description, 
+                    image: mainImageFilename, 
+                    subtypes: updatedSubtypes 
+                };
+
+                const existingIndex = appData.inventory.findIndex(p => p.code === code);
+
+                if (existingIndex === -1) {
+                    appData.inventory.push(productData);
+                } else {
+                    appData.inventory[existingIndex] = productData;
+                }
+
+                clearProductForm();
+                bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+
+                await saveData();
+                showToast(existingIndex === -1 ? 'Product added successfully' : 'Product updated successfully', 'success');
+                setTimeout(() => renderInventory(), 500);
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showToast('Error saving product', 'error');
+            }
+        }
+
+        function clearProductForm() {
+            const form = document.getElementById('productForm');
+            if (form) form.reset();
+            
+            const codeInput = document.getElementById('productCode');
+            if (codeInput) codeInput.disabled = false;
+            
+            sessionStorage.removeItem('tempSubtypes');
+            
+            imageFiles.main = null;
+            imageFiles.variants = {};
+            
+            const preview = document.getElementById('mainImagePreview');
+            if (preview) {
+                preview.src = '';
+                preview.style.display = 'none';
+            }
+            
+            editingProductCode = null;
+        }
+
+        async function deleteProduct(code) {
+            if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return;
+            
+            appData.inventory = appData.inventory.filter(p => p.code !== code);
+            await saveData();
+            showToast('Product deleted successfully', 'success');
+            setTimeout(() => renderInventory(), 500);
+        }
+
+        function openAddProductModal() {
+            clearProductForm();
+            const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+            modal.show();
+        }
+
+        // ======================== LEDGER PAGE ========================
+        function renderLedger() {
+            const monthKey = `${currentFilters.year}-${String(currentFilters.month).padStart(2, '0')}`;
+            const monthTransactions = appData.transactions[monthKey] || [];
+
+            const html = `
+                <div class="container-fluid">
+                    <div class="mb-3">
+                        <button class="btn btn-secondary btn-sm" onclick="navigate('home')">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+
+                    <h2 class="mb-4"><i class="fas fa-book"></i> Sales Ledger</h2>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-12 col-md-3">
+                                    <label class="form-label mb-1">Year</label>
+                                    <select class="form-select form-select-sm" onchange="handleYearChange(this.value)">
+                                        ${[2026, 2025, 2024].map(y => `<option value="${y}" ${y === currentFilters.year ? 'selected' : ''}>${y}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <label class="form-label mb-1">Month</label>
+                                    <select class="form-select form-select-sm" onchange="handleMonthChange(this.value)">
+                                        ${Array.from({length: 12}, (_, i) => i + 1).map(m => `<option value="${m}" ${m === currentFilters.month ? 'selected' : ''}>${getMonthName(m)}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label mb-1">&nbsp;</label>
+                                    <button class="btn btn-primary btn-sm w-100" onclick="openAddTransactionModal()">
+                                        <i class="fas fa-plus"></i> Add Sale
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col">
+                                    <h6 class="mb-0">Sales Transactions</h6>
+                                </div>
+                                <div class="col-auto text-end">
+                                    <small style="color: #aaaaaa;">Total: ₹${monthTransactions.reduce((sum, t) => sum + t.total, 0).toLocaleString()}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            ${monthTransactions.length === 0 ? `
+                                <div class="text-center py-5">
+                                    <i class="fas fa-inbox" style="font-size: 2.5rem; color: #444444; margin-bottom: 1rem; display: block;"></i>
+                                    <p style="color: #888888; margin: 0;">No sales recorded for ${getMonthName(currentFilters.month)} ${currentFilters.year}</p>
+                                </div>
+                            ` : `
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Product</th>
+                                                <th>Variant</th>
+                                                <th>Qty</th>
+                                                <th>Price</th>
+                                                <th>Total</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${monthTransactions.map(txn => {
+                                                const product = appData.inventory.find(p => p.code === txn.itemCode);
+                                                const subtype = product?.subtypes.find(s => s.subcode === txn.subcode);
+                                                const imageUrl = subtype?.image ? getImageUrl(subtype.image) : product?.image ? getImageUrl(product.image) : '';
+                                                
+                                                return `
+                                                <tr>
+                                                    <td style="white-space: nowrap;">${txn.date}</td>
+                                                    <td>
+                                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                                            ${imageUrl ? `
+                                                                <img src="${imageUrl}" alt="${txn.name}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 1px solid #333333;">
+                                                            ` : `
+                                                                <div style="width: 40px; height: 40px; background: rgba(20, 20, 20, 0.6); border-radius: 6px; display: flex; align-items: center; justify-content: center; border: 1px solid #333333; backdrop-filter: blur(10px);">
+                                                                    <i class="fas fa-image" style="color: #666666; font-size: 0.9rem;"></i>
+                                                                </div>
+                                                            `}
+                                                            <div>
+                                                                <strong>${txn.name}</strong>
+                                                                <div style="font-size: 0.75rem; color: #999999;">${subtype?.color || 'N/A'}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td><small>${subtype?.color || 'N/A'}</small></td>
+                                                    <td>${txn.qty}</td>
+                                                    <td>₹${txn.sellingPrice}</td>
+                                                    <td><strong>₹${txn.total}</strong></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-danger" onclick="deleteTransaction('${txn.id}', '${monthKey}')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `}).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('page-content').innerHTML = html;
+            renderTransactionModal();
+        }
+
+        function handleYearChange(year) {
+            currentFilters.year = parseInt(year);
+            renderLedger();
+        }
+
+        function handleMonthChange(month) {
+            currentFilters.month = parseInt(month);
+            renderLedger();
+        }
+
+        function renderTransactionModal() {
+            const modal = `
+                <div class="modal fade" id="addTransactionModal" tabindex="-1" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-shopping-cart"></i> Add Sale</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="transactionForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Date *</label>
+                                        <input type="date" class="form-control" id="txnDate" value="${new Date().toISOString().split('T')[0]}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Product *</label>
+                                        <select class="form-select" id="txnProduct" onchange="handleProductSelect()" required>
+                                            <option value="">Select Product</option>
+                                            ${appData.inventory.map(p => `<option value="${p.code}">${p.name} (${p.code})</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Variant/Color *</label>
+                                        <select class="form-select" id="txnSubtype" onchange="handleSubtypeSelect()" required>
+                                            <option value="">Select Variant</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Quantity *</label>
+                                        <input type="number" class="form-control" id="txnQty" min="1" value="1" required onchange="updateTransactionTotal()">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Selling Price (per unit)</label>
+                                        <input type="number" class="form-control" id="txnUnitPrice" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Total</label>
+                                        <input type="number" class="form-control" id="txnTotal" readonly style="font-size: 1.1rem; font-weight: 700;">
+                                    </div>
+
+                                    <div class="modal-footer mt-4">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Add Sale</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('addTransactionModal');
+            if (!existingModal) {
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modal;
+                document.body.appendChild(modalContainer);
+                
+                document.getElementById('transactionForm').addEventListener('submit', saveTransaction);
+            }
+        }
+
+        function handleProductSelect() {
+            const code = document.getElementById('txnProduct').value;
+            const product = appData.inventory.find(p => p.code === code);
+            const subtypeSelect = document.getElementById('txnSubtype');
+
+            subtypeSelect.innerHTML = '<option value="">Select Variant</option>';
+            if (product) {
+                product.subtypes.forEach(sub => {
+                    const option = document.createElement('option');
+                    option.value = sub.subcode;
+                    option.textContent = `${sub.color} - ${sub.qty} available @ ₹${sub.sellingPrice}`;
+                    option.dataset.qty = sub.qty;
+                    option.dataset.price = sub.sellingPrice;
+                    subtypeSelect.appendChild(option);
+                });
+            }
+        }
+
+        function handleSubtypeSelect() {
+            const option = document.getElementById('txnSubtype').selectedOptions[0];
+            const price = option?.dataset.price || 0;
+            document.getElementById('txnUnitPrice').value = price;
+            updateTransactionTotal();
+        }
+
+        function updateTransactionTotal() {
+            const qty = parseInt(document.getElementById('txnQty').value) || 0;
+            const unitPrice = parseInt(document.getElementById('txnUnitPrice').value) || 0;
+            document.getElementById('txnTotal').value = qty * unitPrice;
+        }
+
+        async function saveTransaction(e) {
+            e.preventDefault();
+
+            const date = document.getElementById('txnDate').value;
+            const itemCode = document.getElementById('txnProduct').value;
+            const subcode = document.getElementById('txnSubtype').value;
+            const qty = parseInt(document.getElementById('txnQty').value);
+
+            const product = appData.inventory.find(p => p.code === itemCode);
+            const subtype = product?.subtypes.find(s => s.subcode === subcode);
+
+            if (!subtype) {
+                showToast('Product variant not found', 'error');
+                return;
+            }
+
+            if (subtype.qty < qty) {
+                showToast(`Insufficient inventory. Only ${subtype.qty} units available`, 'error');
+                return;
+            }
+
+            const monthKey = date.substring(0, 7);
+            if (!appData.transactions[monthKey]) appData.transactions[monthKey] = [];
+
+            const transaction = {
+                id: `txn${Date.now()}`,
+                date,
+                itemCode,
+                subcode,
+                category: product.category,
+                name: product.name,
+                qty,
+                actualPrice: subtype.actualPrice,
+                sellingPrice: subtype.sellingPrice,
+                total: qty * subtype.sellingPrice
+            };
+
+            appData.transactions[monthKey].push(transaction);
+            subtype.qty -= qty;
+
+            bootstrap.Modal.getInstance(document.getElementById('addTransactionModal')).hide();
+            await saveData();
+            showToast('Sale recorded successfully', 'success');
+            setTimeout(() => renderLedger(), 500);
+        }
+
+        async function deleteTransaction(id, monthKey) {
+            if (!confirm('Delete this transaction?')) return;
+            
+            const transaction = appData.transactions[monthKey]?.find(t => t.id === id);
+            if (transaction) {
+                const product = appData.inventory.find(p => p.code === transaction.itemCode);
+                const subtype = product?.subtypes.find(s => s.subcode === transaction.subcode);
+                if (subtype) {
+                    subtype.qty += transaction.qty;
+                }
+            }
+
+            appData.transactions[monthKey] = appData.transactions[monthKey].filter(t => t.id !== id);
+            await saveData();
+            showToast('Transaction deleted', 'success');
+            setTimeout(() => renderLedger(), 500);
+        }
+
+        function openAddTransactionModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addTransactionModal'));
+            modal.show();
+        }
+
+        // ======================== ANALYTICS PAGE ========================
+        function renderAnalytics() {
+            const totalProfit = calculateTotalProfit();
+            const totalInvested = appData.oneTimeExpenses.reduce((sum, e) => sum + e.amount, 0);
+            const totalRevenue = Object.values(appData.transactions).flat().reduce((sum, t) => sum + t.total, 0);
+            const totalCost = Object.values(appData.transactions).flat().reduce((sum, t) => sum + (t.actualPrice * t.qty), 0);
+            const roi = totalInvested > 0 ? ((totalProfit / totalInvested) * 100).toFixed(2) : 0;
+            const avgOrderValue = Object.values(appData.transactions).flat().length > 0 
+                ? (totalRevenue / Object.values(appData.transactions).flat().length).toFixed(0) 
+                : 0;
+
+            const html = `
+                <div class="container-fluid">
+                    <div class="mb-3">
+                        <button class="btn btn-secondary btn-sm" onclick="navigate('home')">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+
+                    <h2 class="mb-4"><i class="fas fa-chart-line"></i> Business Analytics</h2>
+
+                    <div class="responsive-grid mb-5">
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-coins"></i></div>
+                            <div class="metric-value">₹${totalRevenue.toLocaleString()}</div>
+                            <div class="metric-label">Total Revenue</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-chart-pie"></i></div>
+                            <div class="metric-value">₹${totalProfit.toLocaleString()}</div>
+                            <div class="metric-label">Total Profit</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-chart-bar"></i></div>
+                            <div class="metric-value">${roi}%</div>
+                            <div class="metric-label">ROI</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon"><i class="fas fa-shopping-bag"></i></div>
+                            <div class="metric-value">₹${avgOrderValue}</div>
+                            <div class="metric-label">Avg Order Value</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-bar-chart"></i> Monthly Revenue (12 Months)</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('page-content').innerHTML = html;
+            renderAnalyticsCharts();
+        }
+
+        function renderAnalyticsCharts() {
+            const months = [];
+            const revenues = [];
+            const colors = ['#ffffff', '#e0e0e0', '#c0c0c0', '#a0a0a0', '#808080', '#606060', '#404040', '#202020', '#ffffff', '#e0e0e0', '#c0c0c0', '#a0a0a0'];
+
+            for (let i = 11; i >= 0; i--) {
+                const date = new Date();
+                date.setMonth(date.getMonth() - i);
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+
+                months.push(getMonthName(month).substring(0, 3) + ' ' + year);
+                revenues.push(calculateMonthlyRevenue(year, month));
+            }
+
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) return;
+            
+            if (charts.revenue) charts.revenue.destroy();
+            
+            charts.revenue = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: revenues,
+                        backgroundColor: colors,
+                        borderColor: '#ffffff',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cccccc', font: { size: 12 } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: '#888888', font: { size: 11 } },
+                            grid: { color: '#333333', drawBorder: false },
+                            beginAtZero: true
+                        },
+                        x: {
+                            ticks: { color: '#888888', font: { size: 10 } },
+                            grid: { display: false, drawBorder: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ======================== BUDGET PAGE ========================
+        function renderBudget() {
+            if (!appData.budgets) appData.budgets = [];
+
+            const html = `
+                <div class="container-fluid">
+                    <div class="mb-3">
+                        <button class="btn btn-secondary btn-sm" onclick="navigate('home')">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+
+                    <h2 class="mb-4"><i class="fas fa-wallet"></i> Budget & Investments</h2>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <button class="btn btn-primary btn-sm" onclick="openAddBudgetModal()">
+                                <i class="fas fa-plus"></i> Add Budget Item
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col">
+                                    <h6 class="mb-0">Budget Items</h6>
+                                </div>
+                                <div class="col-auto text-end">
+                                    <small style="color: #aaaaaa;">Total: ₹${(appData.budgets || []).reduce((sum, b) => sum + b.amount, 0).toLocaleString()}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            ${(!appData.budgets || appData.budgets.length === 0) ? `
+                                <div class="text-center py-5">
+                                    <i class="fas fa-inbox" style="font-size: 2.5rem; color: #444444; margin-bottom: 1rem; display: block;"></i>
+                                    <p style="color: #888888; margin: 0;">No budget items added yet</p>
+                                </div>
+                            ` : `
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Category</th>
+                                                <th>Amount</th>
+                                                <th>Date</th>
+                                                <th>Description</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${(appData.budgets || []).map(budget => `
+                                                <tr>
+                                                    <td><strong>${budget.name}</strong></td>
+                                                    <td><span class="badge badge-warning">${budget.category}</span></td>
+                                                    <td style="font-weight: 600;">₹${budget.amount.toLocaleString()}</td>
+                                                    <td style="white-space: nowrap;">${budget.date || 'N/A'}</td>
+                                                    <td><small style="color: #999999;">${budget.description || '-'}</small></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-danger" onclick="deleteBudgetItem('${budget.id}')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('page-content').innerHTML = html;
+            renderAddBudgetModal();
+        }
+
+        function renderAddBudgetModal() {
+            const modal = `
+                <div class="modal fade" id="addBudgetModal" tabindex="-1" data-bs-backdrop="static">
+                    <div class="modal-dialog modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-plus"></i> Add Budget Item</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="budgetForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Item Name *</label>
+                                        <input type="text" class="form-control" id="budgetName" placeholder="e.g., 3D Printer, Filament Spool" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Category *</label>
+                                        <select class="form-select" id="budgetCategory" required>
+                                            <option value="">Select Category</option>
+                                            <option value="Machine">Machine</option>
+                                            <option value="Materials">Materials</option>
+                                            <option value="Maintenance">Maintenance</option>
+                                            <option value="Software">Software</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Amount (₹) *</label>
+                                        <input type="number" class="form-control" id="budgetAmount" placeholder="0" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Date</label>
+                                        <input type="date" class="form-control" id="budgetDate" value="${new Date().toISOString().split('T')[0]}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Description</label>
+                                        <textarea class="form-control" id="budgetDescription" placeholder="Add details..." rows="2"></textarea>
+                                    </div>
+
+                                    <div class="modal-footer mt-4">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Add Item</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('addBudgetModal');
+            if (!existingModal) {
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modal;
+                document.body.appendChild(modalContainer);
+                
+                document.getElementById('budgetForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    if (!appData.budgets) appData.budgets = [];
+
+                    appData.budgets.push({
+                        id: `budget${Date.now()}`,
+                        name: document.getElementById('budgetName').value,
+                        category: document.getElementById('budgetCategory').value,
+                        amount: parseInt(document.getElementById('budgetAmount').value),
+                        date: document.getElementById('budgetDate').value,
+                        description: document.getElementById('budgetDescription').value
+                    });
+
+                    bootstrap.Modal.getInstance(document.getElementById('addBudgetModal')).hide();
+                    saveData();
+                    showToast('Budget item added successfully', 'success');
+                    setTimeout(() => renderBudget(), 500);
+                });
+            }
+        }
+
+        function deleteBudgetItem(id) {
+            if (!confirm('Delete this budget item?')) return;
+            appData.budgets = (appData.budgets || []).filter(b => b.id !== id);
+            saveData();
+            showToast('Budget item deleted', 'success');
+            setTimeout(() => renderBudget(), 500);
+        }
+
+        function openAddBudgetModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addBudgetModal'));
+            modal.show();
+        }
+
+        // ======================== QR GENERATION ========================
+        function openQRGeneratorMenu() {
+            const html = `
+                <div class="modal fade" id="qrGeneratorMenu" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-qrcode"></i> Generate QR Code</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center">
+                                    <p style="margin-bottom: 1.5rem; color: #aaaaaa;">Choose what you want to generate QR for:</p>
+                                    <button class="btn btn-primary btn-lg w-100 mb-3" onclick="selectMainCode()">
+                                        <i class="fas fa-qrcode"></i> Main Code (Product)
+                                    </button>
+                                    <button class="btn btn-secondary btn-lg w-100" onclick="selectSubCode()">
+                                        <i class="fas fa-qrcode"></i> Sub Code (Variant)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = html;
+            document.body.appendChild(modalContainer);
+
+            const modal = new bootstrap.Modal(document.getElementById('qrGeneratorMenu'));
+            modal.show();
+        }
+
+        function selectMainCode() {
+            bootstrap.Modal.getInstance(document.getElementById('qrGeneratorMenu')).hide();
+            
+            const html = `
+                <div class="modal fade" id="mainCodeTypeModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-boxes"></i> Main Code</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p style="margin-bottom: 1.5rem; color: #aaaaaa;">Do you have an existing product?</p>
+                                <button class="btn btn-primary btn-lg w-100 mb-3" onclick="selectExistingMainCode()">
+                                    <i class="fas fa-search"></i> Existing Product
+                                </button>
+                                <button class="btn btn-secondary btn-lg w-100" onclick="createNewMainCode()">
+                                    <i class="fas fa-plus"></i> New Product
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = html;
+            document.body.appendChild(modalContainer);
+
+            const modal = new bootstrap.Modal(document.getElementById('mainCodeTypeModal'));
+            modal.show();
+        }
+
+        function selectExistingMainCode() {
+            bootstrap.Modal.getInstance(document.getElementById('mainCodeTypeModal')).hide();
+
+            const html = `
+                <div class="modal fade" id="selectMainCodeModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Select Product</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <select class="form-select form-select-lg" id="productSelectDropdown" required>
+                                    <option value="">Choose a product...</option>
+                                    ${appData.inventory.map(p => `<option value="${p.code}">${p.name} (${p.code})</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="generateMainCodeQR()">Generate QR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = html;
+            document.body.appendChild(modalContainer);
+
+            const modal = new bootstrap.Modal(document.getElementById('selectMainCodeModal'));
+            modal.show();
+        }
+
+        function createNewMainCode() {
+            bootstrap.Modal.getInstance(document.getElementById('mainCodeTypeModal')).hide();
+            navigate('inventory');
+            setTimeout(() => openAddProductModal(), 300);
+        }
+
+        function generateMainCodeQR() {
+            const code = document.getElementById('productSelectDropdown').value;
+            if (!code) {
+                showToast('Please select a product', 'error');
+                return;
+            }
+
+            const product = appData.inventory.find(p => p.code === code);
+            if (!product) return;
+
+            bootstrap.Modal.getInstance(document.getElementById('selectMainCodeModal')).hide();
+            showQRCodeDisplay(code, product.name, 'Main Code');
+        }
+
+        function selectSubCode() {
+            bootstrap.Modal.getInstance(document.getElementById('qrGeneratorMenu')).hide();
+
+            const html = `
+                <div class="modal fade" id="subCodeTypeModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-palette"></i> Sub Code (Variant)</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p style="margin-bottom: 1.5rem; color: #aaaaaa;">Do you have an existing variant?</p>
+                                <button class="btn btn-primary btn-lg w-100 mb-3" onclick="selectExistingSubCode()">
+                                    <i class="fas fa-search"></i> Existing Variant
+                                </button>
+                                <button class="btn btn-secondary btn-lg w-100" onclick="createNewSubCode()">
+                                    <i class="fas fa-plus"></i> New Variant
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = html;
+            document.body.appendChild(modalContainer);
+
+            const modal = new bootstrap.Modal(document.getElementById('subCodeTypeModal'));
+            modal.show();
+        }
+
+        function selectExistingSubCode() {
+            bootstrap.Modal.getInstance(document.getElementById('subCodeTypeModal')).hide();
+
+            const html = `
+                <div class="modal fade" id="selectParentProductModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Select Main Product</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <select class="form-select form-select-lg" id="parentProductDropdown" onchange="updateSubCodeList()" required>
+                                    <option value="">Choose a product...</option>
+                                    ${appData.inventory.map(p => `<option value="${p.code}">${p.name} (${p.code})</option>`).join('')}
+                                </select>
+                                <select class="form-select form-select-lg mt-3" id="subCodeDropdown" style="display:none;" required>
+                                    <option value="">Choose variant...</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="generateSubCodeQR()">Generate QR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = html;
+            document.body.appendChild(modalContainer);
+
+            const modal = new bootstrap.Modal(document.getElementById('selectParentProductModal'));
+            modal.show();
+        }
+
+        function updateSubCodeList() {
+            const parentCode = document.getElementById('parentProductDropdown').value;
+            const product = appData.inventory.find(p => p.code === parentCode);
+            const subCodeDropdown = document.getElementById('subCodeDropdown');
+
+            if (product && product.subtypes.length > 0) {
+                subCodeDropdown.innerHTML = '<option value="">Choose variant...</option>' + 
+                    product.subtypes.map(s => `<option value="${s.subcode}">${s.color} (${s.subcode})</option>`).join('');
+                subCodeDropdown.style.display = 'block';
+            } else {
+                subCodeDropdown.style.display = 'none';
+                showToast('This product has no variants', 'warning');
+            }
+        }
+
+        function generateSubCodeQR() {
+            const subcode = document.getElementById('subCodeDropdown').value;
+            const parentCode = document.getElementById('parentProductDropdown').value;
+
+            if (!subcode || !parentCode) {
+                showToast('Please select both product and variant', 'error');
+                return;
+            }
+
+            const product = appData.inventory.find(p => p.code === parentCode);
+            const subtype = product?.subtypes.find(s => s.subcode === subcode);
+
+            if (!subtype) return;
+
+            bootstrap.Modal.getInstance(document.getElementById('selectParentProductModal')).hide();
+            showQRCodeDisplay(subcode, `${product.name} - ${subtype.color}`, 'Sub Code');
+        }
+
+        function createNewSubCode() {
+            bootstrap.Modal.getInstance(document.getElementById('subCodeTypeModal')).hide();
+
+            const html = `
+                <div class="modal fade" id="selectProductForVariantModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Select Main Product</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <select class="form-select form-select-lg" id="parentProductForVariant" required>
+                                    <option value="">Choose a product...</option>
+                                    ${appData.inventory.map(p => `<option value="${p.code}">${p.name} (${p.code})</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="proceedToAddVariant()">Continue</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = html;
+            document.body.appendChild(modalContainer);
+
+            const modal = new bootstrap.Modal(document.getElementById('selectProductForVariantModal'));
+            modal.show();
+        }
+
+        function proceedToAddVariant() {
+            const parentCode = document.getElementById('parentProductForVariant').value;
+            if (!parentCode) {
+                showToast('Please select a product', 'error');
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('selectProductForVariantModal')).hide();
+            navigate('inventory');
+            setTimeout(() => {
+                const product = appData.inventory.find(p => p.code === parentCode);
+                if (product) {
+                    editProduct(parentCode);
+                }
+            }, 300);
+        }
+
+        function showQRCodeDisplay(qrText, productName, type) {
+            const canvas = document.createElement('canvas');
+            QRCode.toCanvas(canvas, qrText, { 
+                width: 300, 
+                margin: 2, 
+                color: { 
+                    dark: '#000000', 
+                    light: '#ffffff' 
+                }
+            }, (err) => {
+                if (err) {
+                    showToast('Error generating QR code', 'error');
+                    return;
+                }
+
+                const qrImage = canvas.toDataURL('image/png');
+
+                const html = `
+                    <div class="modal fade" id="qrDisplayModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title"><i class="fas fa-qrcode"></i> QR Code Generated</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <div style="margin-bottom: 1.5rem;">
+                                        <strong style="display: block; margin-bottom: 0.5rem;">Product: ${productName}</strong>
+                                        <small style="color: #aaaaaa;">Type: ${type}</small>
+                                        <small style="color: #999999; display: block; margin-top: 0.25rem; font-family: monospace;">Code: ${qrText}</small>
+                                    </div>
+                                    <img src="${qrImage}" alt="QR Code" style="max-width: 300px; border: 1px solid #333333; border-radius: 8px; padding: 10px; background: white;">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" onclick="downloadQRCode('${qrImage}', '${qrText}')">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = html;
+                document.body.appendChild(modalContainer);
+
+                const modal = new bootstrap.Modal(document.getElementById('qrDisplayModal'));
+                modal.show();
+            });
+        }
+
+        function downloadQRCode(qrImage, qrText) {
+            const link = document.createElement('a');
+            link.href = qrImage;
+            link.download = `QR_${qrText}_${new Date().getTime()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('QR Code downloaded successfully', 'success');
+        }
+
+        // ======================== DATA MANAGEMENT MODAL ========================
+        function openDataManagement() {
+            const html = `
+                <div class="modal fade" id="dataManagementModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-database"></i> Data Management</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" onclick="exportData()">
+                                        <i class="fas fa-download"></i> Export Data
+                                    </button>
+                                    <label class="btn btn-secondary">
+                                        <i class="fas fa-upload"></i> Import Data
+                                        <input type="file" accept=".json" style="display: none;" onchange="importData(event)">
+                                    </label>
+                                    <button class="btn btn-info" onclick="createBackup()">
+                                        <i class="fas fa-copy"></i> Create Backup
+                                    </button>
+                                    <button class="btn btn-warning" onclick="if(confirm('Reset to sample data?')) { resetToSampleData(); }">
+                                        <i class="fas fa-redo"></i> Reset to Sample Data
+                                    </button>
+                                    <button class="btn btn-danger" onclick="if(confirm('Clear all data?')) { clearAllData(); }">
+                                        <i class="fas fa-trash"></i> Clear All Data
+                                    </button>
+                                </div>
+                                <div class="mt-3" style="font-size: 0.85rem; color: #888888;">
+                                    <strong>Current Data:</strong>
+                                    <div>Products: ${appData.inventory.length}</div>
+                                    <div>Transactions: ${Object.values(appData.transactions).flat().length}</div>
+                                    <div>Budget Items: ${(appData.budgets || []).length}</div>
+                                    <div>Backups: ${(appData.backups || []).length}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const existingModal = document.getElementById('dataManagementModal');
+            if (!existingModal) {
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = html;
+                document.body.appendChild(modalContainer);
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('dataManagementModal'));
+            modal.show();
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cosmic_corner_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Data exported successfully', 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (importedData.version && importedData.inventory) {
+                        if (confirm('Import data? This will replace your current data.')) {
+                            appData = importedData;
+                            saveData();
+                            showToast('Data imported successfully', 'success');
+                            navigate(currentPage);
+                        }
+                    } else {
+                        showToast('Invalid data format', 'error');
+                    }
+                } catch (error) {
+                    showToast('Error parsing JSON file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function createBackup() {
+            const backup = {
+                timestamp: new Date().toISOString(),
+                data: JSON.parse(JSON.stringify(appData))
+            };
+            
+            if (!appData.backups) appData.backups = [];
+            appData.backups.push(backup);
+            
+            if (appData.backups.length > 10) {
+                appData.backups = appData.backups.slice(-10);
+            }
+            
+            saveData();
+            showToast('Backup created successfully', 'success');
+        }
+
+        function resetToSampleData() {
+            appData = getSampleData();
+            saveData();
+            showToast('Reset to sample data', 'success');
+            navigate('home');
+        }
+
+        function clearAllData() {
+            appData = {
+                version: 4,
+                inventory: [],
+                transactions: {},
+                oneTimeExpenses: [],
+                budgets: [],
+                backups: [],
+                settings: {
+                    theme: 'dark',
+                    currency: '₹',
+                    dateFormat: 'YYYY-MM-DD'
+                }
+            };
+            saveData();
+            showToast('All data cleared', 'success');
+            navigate('home');
+        }
+
+        // ======================== UTILITY FUNCTIONS ========================
+        function getMonthName(month) {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            return months[month - 1];
+        }
+
+        function showToast(message, type = 'info') {
+            const toastId = `toast-${Date.now()}`;
+            const icons = {
+                'success': 'check-circle',
+                'error': 'exclamation-circle',
+                'warning': 'exclamation-triangle',
+                'info': 'info-circle'
+            };
+
+            const toast = `
+                <div class="toast ${type}" role="alert" id="${toastId}">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <i class="fas fa-${icons[type] || icons.info}" style="color: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#2196f3'}"></i>
+                        <span>${message}</span>
+                    </div>
+                </div>
+            `;
+
+            const container = document.getElementById('toast-container');
+            const toastEl = document.createElement('div');
+            toastEl.innerHTML = toast;
+            container.appendChild(toastEl);
+
+            setTimeout(() => {
+                toastEl.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => toastEl.remove(), 300);
+            }, 3000);
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                const instance = bootstrap.Modal.getInstance(modal);
+                if (instance) instance.hide();
+            });
+        }
+
+        function fixScrollIssues() {
+            // Reset body overflow
+            document.body.style.overflow = 'auto';
+            document.body.style.overflowX = 'hidden';
+            
+            // Check for any elements causing horizontal scroll
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                if (el.scrollWidth > document.documentElement.clientWidth) {
+                    el.style.maxWidth = '100%';
+                    el.style.overflowX = 'hidden';
+                }
+            });
+            
+            // Ensure main container doesn't exceed viewport
+            const mainContainer = document.querySelector('.main-container');
+            if (mainContainer && mainContainer.scrollHeight <= window.innerHeight) {
+                mainContainer.style.minHeight = 'calc(100vh - 90px)';
+            }
+        }
+
+        // ======================== INITIALIZE ========================
+        init();
+    </script>
 </body>
 </html>

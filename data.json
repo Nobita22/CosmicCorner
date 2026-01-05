@@ -1,0 +1,147 @@
+{
+  "version": 4,
+  "inventory": [],
+  "transactions": {},
+  "oneTimeExpenses": [],
+  "budgets": [],
+  "backups": [
+    {
+      "timestamp": "2026-01-04T23:34:44.144Z",
+      "data": {
+        "version": 4,
+        "inventory": [],
+        "transactions": {},
+        "oneTimeExpenses": [],
+        "budgets": [],
+        "backups": [],
+        "settings": {
+          "theme": "dark",
+          "currency": "₹",
+          "dateFormat": "YYYY-MM-DD"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-01-04T23:34:56.174Z",
+      "data": {
+        "version": 4,
+        "inventory": [],
+        "transactions": {},
+        "oneTimeExpenses": [],
+        "budgets": [
+          {
+            "id": "budget1767569696173",
+            "name": "Printer ",
+            "category": "Machine",
+            "amount": 35000,
+            "date": "2025-12-01",
+            "description": ""
+          }
+        ],
+        "backups": [
+          {
+            "timestamp": "2026-01-04T23:34:44.144Z",
+            "data": {
+              "version": 4,
+              "inventory": [],
+              "transactions": {},
+              "oneTimeExpenses": [],
+              "budgets": [],
+              "backups": [],
+              "settings": {
+                "theme": "dark",
+                "currency": "₹",
+                "dateFormat": "YYYY-MM-DD"
+              }
+            }
+          }
+        ],
+        "settings": {
+          "theme": "dark",
+          "currency": "₹",
+          "dateFormat": "YYYY-MM-DD"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-01-04T23:35:11.263Z",
+      "data": {
+        "version": 4,
+        "inventory": [],
+        "transactions": {},
+        "oneTimeExpenses": [],
+        "budgets": [],
+        "backups": [
+          {
+            "timestamp": "2026-01-04T23:34:44.144Z",
+            "data": {
+              "version": 4,
+              "inventory": [],
+              "transactions": {},
+              "oneTimeExpenses": [],
+              "budgets": [],
+              "backups": [],
+              "settings": {
+                "theme": "dark",
+                "currency": "₹",
+                "dateFormat": "YYYY-MM-DD"
+              }
+            }
+          },
+          {
+            "timestamp": "2026-01-04T23:34:56.174Z",
+            "data": {
+              "version": 4,
+              "inventory": [],
+              "transactions": {},
+              "oneTimeExpenses": [],
+              "budgets": [
+                {
+                  "id": "budget1767569696173",
+                  "name": "Printer ",
+                  "category": "Machine",
+                  "amount": 35000,
+                  "date": "2025-12-01",
+                  "description": ""
+                }
+              ],
+              "backups": [
+                {
+                  "timestamp": "2026-01-04T23:34:44.144Z",
+                  "data": {
+                    "version": 4,
+                    "inventory": [],
+                    "transactions": {},
+                    "oneTimeExpenses": [],
+                    "budgets": [],
+                    "backups": [],
+                    "settings": {
+                      "theme": "dark",
+                      "currency": "₹",
+                      "dateFormat": "YYYY-MM-DD"
+                    }
+                  }
+                }
+              ],
+              "settings": {
+                "theme": "dark",
+                "currency": "₹",
+                "dateFormat": "YYYY-MM-DD"
+              }
+            }
+          }
+        ],
+        "settings": {
+          "theme": "dark",
+          "currency": "₹",
+          "dateFormat": "YYYY-MM-DD"
+        }
+      }
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "currency": "₹",
+    "dateFormat": "YYYY-MM-DD"
+  }
+}
