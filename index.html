@@ -2242,30 +2242,33 @@
 
         function handleMainImageUpload(event) {
             const file = event.target.files[0];
-            if (file) {
-                const maxSize = 10 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    showToast('File too large. Max 10MB.', 'error');
-                    event.target.value = '';
-                    return;
-                }
-                
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-                if (!allowedTypes.includes(file.type)) {
-                    showToast('Invalid file type. Please upload JPG, PNG, or WebP images.', 'error');
-                    event.target.value = '';
-                    return;
-                }
-                
-                imageFiles.main = file;
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('mainImagePreview').src = e.target.result;
-                    document.getElementById('mainImagePreview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+            if (!file) return;
+
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showToast('File too large. Max 10MB.', 'error');
+                event.target.value = '';
+                return;
             }
+
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                showToast('Invalid file type. Please upload JPG, PNG, or WebP images.', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            imageFiles.main = file;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('mainImagePreview');
+                if (preview) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
         function renderSubtypesList() {
@@ -2331,41 +2334,48 @@
 
         function handleVariantImageUpload(idx, event) {
             const file = event.target.files[0];
-            if (file) {
-                const maxSize = 10 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    showToast('File too large. Max 10MB.', 'error');
-                    return;
-                }
-                
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-                if (!allowedTypes.includes(file.type)) {
-                    showToast('Invalid file type. Please upload JPG, PNG, or WebP images.', 'error');
-                    return;
-                }
-                
-                if (!imageFiles.variants[idx]) imageFiles.variants[idx] = {};
-                imageFiles.variants[idx].file = file;
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const subtypes = JSON.parse(sessionStorage.getItem('tempSubtypes') || '[]');
+            if (!file) return;
+
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showToast('File too large. Max 10MB.', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                showToast('Invalid file type. Please upload JPG, PNG, or WebP images.', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            if (!imageFiles.variants[idx]) imageFiles.variants[idx] = {};
+            imageFiles.variants[idx].file = file;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const subtypes = JSON.parse(sessionStorage.getItem('tempSubtypes') || '[]');
+                if (subtypes[idx]) {
                     subtypes[idx].tempImage = e.target.result;
                     sessionStorage.setItem('tempSubtypes', JSON.stringify(subtypes));
-                    
-                    let preview = document.getElementById(`variantImagePreview${idx}`);
-                    if (!preview) {
-                        preview = document.createElement('img');
-                        preview.id = `variantImagePreview${idx}`;
-                        preview.className = 'image-preview';
-                        preview.style.maxHeight = '80px';
-                        event.target.parentElement.appendChild(preview);
-                    }
+                }
+
+                let preview = document.getElementById(`variantImagePreview${idx}`);
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.id = `variantImagePreview${idx}`;
+                    preview.className = 'image-preview';
+                    preview.style.maxHeight = '80px';
+                    const container = event.target.parentElement;
+                    if (container) container.appendChild(preview);
+                }
+                if (preview) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
         function addSubtypeRow() {
