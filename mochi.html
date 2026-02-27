@@ -1,50 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ESP32 BLE Chat</title>
+  <meta charset="UTF-8">
+  <title>ESP32 Eye Controller</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    button { margin: 5px; padding: 10px 20px; font-size: 16px; }
+    #log { margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 150px; overflow-y: scroll; }
+  </style>
 </head>
 <body>
-  <h1>ESP32 BLE Communication</h1>
-  <button id="connect">Connect</button>
-  <input id="msgInput" placeholder="Type message">
-  <button id="send">Send</button>
+  <h1>ESP32 Eye Controller</h1>
+  <button id="connect">Connect to ESP32</button><br><br>
+
+  <!-- Eye commands -->
+  <button onclick="sendCommand('blink')">Blink</button>
+  <button onclick="sendCommand('wink_left')">Wink Left</button>
+  <button onclick="sendCommand('wink_right')">Wink Right</button>
+  <button onclick="sendCommand('look_left')">Look Left</button>
+  <button onclick="sendCommand('look_right')">Look Right</button>
+  <button onclick="sendCommand('happy')">Happy</button>
+  <button onclick="sendCommand('surprised')">Surprised</button>
+
   <pre id="log"></pre>
 
-  <script>
-    let device;
-    let characteristic;
+<script>
+let device;
+let characteristic;
 
-    document.getElementById('connect').onclick = async () => {
-      try {
-        device = await navigator.bluetooth.requestDevice({
-          filters: [{name: 'ESP32-BLE'}],
-          optionalServices: ['12345678-1234-1234-1234-1234567890ab']
-        });
+document.getElementById('connect').onclick = async () => {
+  try {
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{name: 'ESP32-Eyes'}],
+      optionalServices: ['12345678-1234-1234-1234-1234567890ab']
+    });
 
-        const server = await device.gatt.connect();
-        const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
-        characteristic = await service.getCharacteristic('abcd1234-5678-1234-5678-abcdef123456');
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
+    characteristic = await service.getCharacteristic('abcd1234-5678-1234-5678-abcdef123456');
 
-        // Start notifications
-        await characteristic.startNotifications();
-        characteristic.addEventListener('characteristicvaluechanged', (event) => {
-          const value = new TextDecoder().decode(event.target.value);
-          document.getElementById('log').textContent += "ESP32: " + value + "\n";
-        });
+    // Start notifications
+    await characteristic.startNotifications();
+    characteristic.addEventListener('characteristicvaluechanged', (event) => {
+      const value = new TextDecoder().decode(event.target.value);
+      log("ESP32: " + value);
+    });
 
-        document.getElementById('log').textContent += "Connected!\n";
-      } catch(error){
-        console.log(error);
-      }
-    }
+    log("Connected to ESP32!");
+  } catch(error){
+    log("Connection failed: " + error);
+  }
+}
 
-    document.getElementById('send').onclick = async () => {
-      const msg = document.getElementById('msgInput').value;
-      if(characteristic){
-        await characteristic.writeValue(new TextEncoder().encode(msg));
-        document.getElementById('log').textContent += "You: " + msg + "\n";
-      }
-    }
-  </script>
+// Function to send commands
+async function sendCommand(cmd){
+  if(characteristic){
+    await characteristic.writeValue(new TextEncoder().encode(cmd));
+    log("Sent: " + cmd);
+  } else {
+    log("Not connected yet!");
+  }
+}
+
+// Helper function to log messages
+function log(msg){
+  const logEl = document.getElementById('log');
+  logEl.textContent += msg + "\n";
+  logEl.scrollTop = logEl.scrollHeight;
+}
+</script>
 </body>
 </html>
