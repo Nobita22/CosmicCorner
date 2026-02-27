@@ -1,95 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESP32 Pet Controller</title>
-<style>
-  body { font-family: Arial; text-align: center; background: #1a1a1a; color: #fff; }
-  button { margin: 5px; padding: 15px 30px; font-size: 18px; border-radius: 10px; border: none; background: #0077ff; color: #fff; cursor: pointer; }
-  button:hover { background: #005bbb; }
-  #status { margin-top: 20px; font-size: 16px; }
-  #stats { margin-top: 10px; text-align: left; display: inline-block; }
-</style>
+  <meta charset="utf-8">
+  <title>ESP32 Pet WebApp</title>
+  <style>
+    button { font-size: 20px; margin: 10px; padding: 10px; }
+    #status { margin-top: 20px; font-size: 18px; }
+  </style>
 </head>
 <body>
-
-<h1>ESP32 Pet 🐾</h1>
-<button id="connectBtn">Connect to Pet</button>
-<div id="controls" style="display:none;">
-  <button onclick="sendAction('FEED')">Feed 🍎</button>
-  <button onclick="sendAction('PET')">Pet 🤗</button>
-  <button onclick="sendAction('PLAY')">Play 🎮</button>
-  <button onclick="sendAction('GIFT:1')">Gift 💰</button>
-  <button onclick="sendTalk()">Talk 🗣️</button>
-  <button onclick="getStatus()">Refresh Stats 🔄</button>
-</div>
-
-<div id="status"></div>
-<div id="stats"></div>
+  <h2>ESP32 Pet</h2>
+  <button onclick="connectBLE()">Connect</button>
+  <button onclick="sendCommand('FEED')">Feed</button>
+  <button onclick="sendCommand('PET')">Pet</button>
+  <button onclick="sendCommand('TALK:Hello')">Talk</button>
+  <button onclick="sendCommand('STATUS')">Get Status</button>
+  <div id="status"></div>
 
 <script>
 let device, characteristic;
 
-async function connect() {
-  try {
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ namePrefix: 'ESP32_PET' }],
-      optionalServices: ['12345678-1234-1234-1234-1234567890ab']
-    });
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
-    characteristic = await service.getCharacteristic('abcd1234-1234-1234-1234-abcdef123456');
+async function connectBLE(){
+  device = await navigator.bluetooth.requestDevice({
+    filters:[{name:'ESP32_PET'}],
+    optionalServices:['12345678-1234-1234-1234-1234567890ab']
+  });
 
-    characteristic.startNotifications();
-    characteristic.addEventListener('characteristicvaluechanged', handleNotifications);
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
+  characteristic = await service.getCharacteristic('abcd1234-1234-1234-1234-abcdef123456');
 
-    document.getElementById('controls').style.display = 'block';
-    document.getElementById('status').innerText = 'Connected! 💚';
-    getStatus();
-  } catch(e) {
-    alert('Connection failed: '+e);
-  }
+  await characteristic.startNotifications();
+  characteristic.addEventListener('characteristicvaluechanged', handleNotifications);
+  document.getElementById('status').innerText = 'Connected!';
 }
 
-function handleNotifications(event) {
+function handleNotifications(event){
   const value = new TextDecoder().decode(event.target.value);
   document.getElementById('status').innerText = 'Notification: ' + value;
-  updateStats(value);
 }
 
-function sendAction(cmd) {
-  if(!characteristic) return;
-  characteristic.writeValue(new TextEncoder().encode(cmd));
+async function sendCommand(cmd){
+  if(!characteristic) { alert('Not connected'); return; }
+  await characteristic.writeValue(new TextEncoder().encode(cmd));
 }
-
-function sendTalk() {
-  const msg = prompt("Say something to your pet:");
-  if(msg && characteristic) characteristic.writeValue(new TextEncoder().encode("TALK:"+msg));
-}
-
-async function getStatus() {
-  if(!characteristic) return;
-  characteristic.writeValue(new TextEncoder().encode("STATUS"));
-}
-
-function updateStats(jsonStr) {
-  try {
-    const stats = JSON.parse(jsonStr);
-    let html = '';
-    html += `Name: ${stats.name || 'Buddy'}<br>`;
-    html += `Level: ${stats.level} (XP: ${stats.xp})<br>`;
-    html += `Happiness: ${stats.happy}<br>`;
-    html += `Hunger: ${stats.hunger}<br>`;
-    html += `Coins: ${stats.coins}<br>`;
-    html += `Mood: ${stats.mood}<br>`;
-    html += `Evolution: ${stats.evo}<br>`;
-    document.getElementById('stats').innerHTML = html;
-  } catch(e) { console.log(e); }
-}
-
-document.getElementById('connectBtn').addEventListener('click', connect);
 </script>
-
 </body>
 </html>
