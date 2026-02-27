@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { font-family:sans-serif; text-align:center; background:#111; color:white;}
+button { padding:15px; margin:8px; font-size:16px; border:none; border-radius:10px;}
+#stats { margin-top:20px;}
+</style>
+</head>
+<body>
+
+<h2>My Digital Pet</h2>
+<button onclick="connect()">Connect</button>
+<button onclick="feed()">Feed 🍎</button>
+<button onclick="pet()">Pet 🖐</button>
+<button onclick="talk()">Talk 💬</button>
+
+<div id="stats"></div>
+
+<script>
+let device, characteristic;
+
+async function connect() {
+  device = await navigator.bluetooth.requestDevice({
+    filters: [{ name: 'ESP32_PET' }],
+    optionalServices: ['12345678-1234-1234-1234-1234567890ab']
+  });
+
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
+  characteristic = await service.getCharacteristic('abcd1234-1234-1234-1234-abcdef123456');
+
+  await send("TIME:" + Math.floor(Date.now()/1000));
+  await send("STATUS");
+
+  characteristic.addEventListener('characteristicvaluechanged', handleNotify);
+  await characteristic.startNotifications();
+}
+
+function send(msg) {
+  return characteristic.writeValue(new TextEncoder().encode(msg));
+}
+
+function feed(){ send("FEED"); }
+function pet(){ send("PET"); }
+function talk(){
+  let t = prompt("Say something:");
+  send("TALK:" + t);
+}
+
+function handleNotify(event){
+  let val = new TextDecoder().decode(event.target.value);
+  let data = JSON.parse(val);
+  document.getElementById("stats").innerHTML =
+    "Level: " + data.level +
+    "<br>Happiness: " + data.happy +
+    "<br>Hunger: " + data.hunger +
+    "<br>Energy: " + data.energy;
+}
+</script>
+
+</body>
+</html>
