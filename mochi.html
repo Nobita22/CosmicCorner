@@ -1,73 +1,273 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ESP32 Eye Controller</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
-    button { margin: 5px; padding: 10px 20px; font-size: 16px; }
-    #log { margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 150px; overflow-y: scroll; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Eyes Controller</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .status.connected { background: rgba(46, 204, 113, 0.3); }
+        .status.disconnected { background: rgba(231, 76, 60, 0.3); }
+        .status.connecting { background: rgba(241, 196, 15, 0.3); }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .btn-blink { background: linear-gradient(45deg, #3498db, #2980b9); }
+        .btn-wink { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        .btn-look { background: linear-gradient(45deg, #f39c12, #e67e22); }
+        .btn-happy { background: linear-gradient(45deg, #2ecc71, #27ae60); }
+        .btn-special { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+        button:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        button:active { transform: translateY(-1px); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        #log {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .log-sent { color: #3498db; }
+        .log-received { color: #2ecc71; }
+        .log-error { color: #e74c3c; }
+        .connect-section {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        #connectBtn {
+            padding: 12px 25px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+        #disconnectBtn {
+            padding: 12px 25px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            display: none;
+        }
+        @media (max-width: 500px) {
+            .buttons { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 1.8em; }
+        }
+    </style>
 </head>
 <body>
-  <h1>ESP32 Eye Controller</h1>
-  <button id="connect">Connect to ESP32</button><br><br>
+    <div class="container">
+        <h1>👁️ ESP32 Eyes Controller</h1>
+        
+        <div id="status" class="status disconnected">Disconnected</div>
+        
+        <div class="connect-section">
+            <button id="connectBtn">Connect ESP32</button>
+            <button id="disconnectBtn">Disconnect</button>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn-blink" data-cmd="blink">Blink</button>
+            <button class="btn-wink" data-cmd="wink_left">Wink Left</button>
+            <button class="btn-wink" data-cmd="wink_right">Wink Right</button>
+            <button class="btn-look" data-cmd="look_left">Look Left</button>
+            <button class="btn-look" data-cmd="look_right">Look Right</button>
+            <button class="btn-happy" data-cmd="happy">Happy 😊</button>
+            <button class="btn-special" data-cmd="surprised">Surprised 😲</button>
+            <button class="btn-special" data-cmd="sleepy">Sleepy 😴</button>
+            <button class="btn-special" data-cmd="angry">Angry 😠</button>
+        </div>
+        
+        <div>
+            <strong>Log:</strong>
+            <div id="log"></div>
+        </div>
+    </div>
 
-  <!-- Eye commands -->
-  <button onclick="sendCommand('blink')">Blink</button>
-  <button onclick="sendCommand('wink_left')">Wink Left</button>
-  <button onclick="sendCommand('wink_right')">Wink Right</button>
-  <button onclick="sendCommand('look_left')">Look Left</button>
-  <button onclick="sendCommand('look_right')">Look Right</button>
-  <button onclick="sendCommand('happy')">Happy</button>
-  <button onclick="sendCommand('surprised')">Surprised</button>
-
-  <pre id="log"></pre>
-
-<script>
-let device;
-let characteristic;
-
-document.getElementById('connect').onclick = async () => {
-  try {
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{name: 'ESP32-Eyes'}],
-      optionalServices: ['12345678-1234-1234-1234-1234567890ab']
-    });
-
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
-    characteristic = await service.getCharacteristic('abcd1234-5678-1234-5678-abcdef123456');
-
-    // Start notifications
-    await characteristic.startNotifications();
-    characteristic.addEventListener('characteristicvaluechanged', (event) => {
-      const value = new TextDecoder().decode(event.target.value);
-      log("ESP32: " + value);
-    });
-
-    log("Connected to ESP32!");
-  } catch(error){
-    log("Connection failed: " + error);
-  }
-}
-
-// Function to send commands
-async function sendCommand(cmd){
-  if(characteristic){
-    await characteristic.writeValue(new TextEncoder().encode(cmd));
-    log("Sent: " + cmd);
-  } else {
-    log("Not connected yet!");
-  }
-}
-
-// Helper function to log messages
-function log(msg){
-  const logEl = document.getElementById('log');
-  logEl.textContent += msg + "\n";
-  logEl.scrollTop = logEl.scrollHeight;
-}
-</script>
+    <script>
+        class ESPEyesController {
+            constructor() {
+                this.device = null;
+                this.server = null;
+                this.service = null;
+                this.characteristic = null;
+                this.connected = false;
+                
+                this.initializeElements();
+                this.bindEvents();
+                this.log('Controller initialized. Open Chrome/Edge and click Connect.');
+            }
+            
+            initializeElements() {
+                this.statusEl = document.getElementById('status');
+                this.connectBtn = document.getElementById('connectBtn');
+                this.disconnectBtn = document.getElementById('disconnectBtn');
+                this.logEl = document.getElementById('log');
+                this.buttons = document.querySelectorAll('.buttons button[data-cmd]');
+            }
+            
+            async connect() {
+                try {
+                    this.setStatus('connecting', 'Searching for ESP32-Eyes...');
+                    this.log('Scanning for ESP32-Eyes device...');
+                    
+                    this.device = await navigator.bluetooth.requestDevice({
+                        filters: [{ name: 'ESP32-Eyes' }],
+                        optionalServices: ['12345678-1234-1234-1234-1234567890ab']
+                    });
+                    
+                    this.device.addEventListener('gattserverdisconnected', () => this.disconnect());
+                    await this.device.gatt.connect();
+                    this.server = this.device.gatt;
+                    
+                    this.service = await this.server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
+                    this.characteristic = await this.service.getCharacteristic('abcd1234-5678-1234-5678-abcdef123456');
+                    
+                    this.characteristic.addEventListener('characteristicvaluechanged', (event) => {
+                        const value = event.target.value;
+                        const decoder = new TextDecoder();
+                        const status = decoder.decode(value);
+                        this.log(`Received: ${status}`, 'received');
+                    });
+                    
+                    this.connected = true;
+                    this.setStatus('connected', `Connected to ${this.device.name}`);
+                    this.log('✅ Successfully connected to ESP32-Eyes!');
+                    this.enableButtons();
+                    
+                } catch (error) {
+                    this.log(`❌ Connection failed: ${error.message}`, 'error');
+                    this.setStatus('disconnected', 'Connection failed');
+                }
+            }
+            
+            async disconnect() {
+                if (this.device && this.device.gatt.connected) {
+                    await this.device.gatt.disconnect();
+                }
+                this.connected = false;
+                this.setStatus('disconnected', 'Disconnected');
+                this.log('Disconnected from ESP32');
+                this.disableButtons();
+                this.device = null;
+                this.server = null;
+                this.service = null;
+                this.characteristic = null;
+            }
+            
+            async sendCommand(cmd) {
+                if (!this.connected || !this.characteristic) {
+                    this.log('❌ Not connected!', 'error');
+                    return;
+                }
+                
+                const encoder = new TextEncoder();
+                const data = encoder.encode(cmd);
+                
+                try {
+                    await this.characteristic.writeValue(data);
+                    this.log(`Sent: "${cmd}"`, 'sent');
+                } catch (error) {
+                    this.log(`❌ Send failed: ${error.message}`, 'error');
+                }
+            }
+            
+            setStatus(state, message) {
+                this.statusEl.textContent = message;
+                this.statusEl.className = `status ${state}`;
+            }
+            
+            enableButtons() {
+                this.buttons.forEach(btn => btn.disabled = false);
+                this.connectBtn.style.display = 'none';
+                this.disconnectBtn.style.display = 'inline-block';
+            }
+            
+            disableButtons() {
+                this.buttons.forEach(btn => btn.disabled = true);
+                this.connectBtn.style.display = 'inline-block';
+                this.disconnectBtn.style.display = 'none';
+            }
+            
+            log(message, type = 'sent') {
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                this.logEl.appendChild(entry);
+                this.logEl.scrollTop = this.logEl.scrollHeight;
+            }
+            
+            bindEvents() {
+                this.connectBtn.addEventListener('click', () => this.connect());
+                this.disconnectBtn.addEventListener('click', () => this.disconnect());
+                
+                this.buttons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const cmd = e.target.dataset.cmd;
+                        this.sendCommand(cmd);
+                    });
+                });
+            }
+        }
+        
+        // Initialize when page loads
+        if ('bluetooth' in navigator) {
+            window.addEventListener('load', () => {
+                new ESPEyesController();
+            });
+        } else {
+            document.body.innerHTML = '<h1>Bluetooth not supported in this browser!</h1><p>Use Chrome or Edge.</p>';
+        }
+    </script>
 </body>
 </html>
