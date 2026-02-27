@@ -1,49 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>ESP32 Pet WebApp</title>
-  <style>
-    button { font-size: 20px; margin: 10px; padding: 10px; }
-    #status { margin-top: 20px; font-size: 18px; }
-  </style>
+  <title>ESP32 BLE Chat</title>
 </head>
 <body>
-  <h2>ESP32 Pet</h2>
-  <button onclick="connectBLE()">Connect</button>
-  <button onclick="sendCommand('FEED')">Feed</button>
-  <button onclick="sendCommand('PET')">Pet</button>
-  <button onclick="sendCommand('TALK:Hello')">Talk</button>
-  <button onclick="sendCommand('STATUS')">Get Status</button>
-  <div id="status"></div>
+  <h1>ESP32 BLE Communication</h1>
+  <button id="connect">Connect</button>
+  <input id="msgInput" placeholder="Type message">
+  <button id="send">Send</button>
+  <pre id="log"></pre>
 
-<script>
-let device, characteristic;
+  <script>
+    let device;
+    let characteristic;
 
-async function connectBLE(){
-  device = await navigator.bluetooth.requestDevice({
-    filters:[{name:'ESP32_PET'}],
-    optionalServices:['12345678-1234-1234-1234-1234567890ab']
-  });
+    document.getElementById('connect').onclick = async () => {
+      try {
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{name: 'ESP32-BLE'}],
+          optionalServices: ['12345678-1234-1234-1234-1234567890ab']
+        });
 
-  const server = await device.gatt.connect();
-  const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
-  characteristic = await service.getCharacteristic('abcd1234-1234-1234-1234-abcdef123456');
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('12345678-1234-1234-1234-1234567890ab');
+        characteristic = await service.getCharacteristic('abcd1234-5678-1234-5678-abcdef123456');
 
-  await characteristic.startNotifications();
-  characteristic.addEventListener('characteristicvaluechanged', handleNotifications);
-  document.getElementById('status').innerText = 'Connected!';
-}
+        // Start notifications
+        await characteristic.startNotifications();
+        characteristic.addEventListener('characteristicvaluechanged', (event) => {
+          const value = new TextDecoder().decode(event.target.value);
+          document.getElementById('log').textContent += "ESP32: " + value + "\n";
+        });
 
-function handleNotifications(event){
-  const value = new TextDecoder().decode(event.target.value);
-  document.getElementById('status').innerText = 'Notification: ' + value;
-}
+        document.getElementById('log').textContent += "Connected!\n";
+      } catch(error){
+        console.log(error);
+      }
+    }
 
-async function sendCommand(cmd){
-  if(!characteristic) { alert('Not connected'); return; }
-  await characteristic.writeValue(new TextEncoder().encode(cmd));
-}
-</script>
+    document.getElementById('send').onclick = async () => {
+      const msg = document.getElementById('msgInput').value;
+      if(characteristic){
+        await characteristic.writeValue(new TextEncoder().encode(msg));
+        document.getElementById('log').textContent += "You: " + msg + "\n";
+      }
+    }
+  </script>
 </body>
 </html>
