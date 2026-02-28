@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>YouTube Uploader</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body style="font-family: sans-serif; padding: 20px">
+  <h2>Set details for your video</h2>
+
+  <label>Description:</label><br />
+  <textarea id="desc" rows="3" style="width:100%"></textarea><br /><br />
+
+  <label>Tags (comma‑separated):</label><br />
+  <input id="tags" type="text" style="width:100%" placeholder="funny, cat, vlog" /><br /><br />
+
+  <label>Scheduled date & time (YYYY-MM-DD HH:MM, IST):</label><br />
+  <input id="dt" type="datetime-local" style="width:100%" /><br /><br />
+
+  <button id="sendData" disabled>Send to bot</button>
+
+  <script>
+    const desc      = document.getElementById("desc");
+    const tags      = document.getElementById("tags");
+    const dtInput   = document.getElementById("dt");
+    const sendData  = document.getElementById("sendData");
+
+    // Telegram WebApp is ready
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand();
+
+    // Enable button only if all fields are filled
+    function updateButton() {
+      const dt = dtInput.value; // format: "2026-03-01T14:00"
+      if (desc.value && tags.value && dt) {
+        sendData.disabled = false;
+      } else {
+        sendData.disabled = true;
+      }
+    }
+
+    desc.addEventListener("input", updateButton);
+    tags.addEventListener("input", updateButton);
+    dtInput.addEventListener("change", updateButton);
+    updateButton();
+
+    // Convert "2026-03-01T14:00" → "2026-03-01 14:00"
+    function formatDateTime(dtStr) {
+      return dtStr.replace("T", " ").substr(0, 16);
+    }
+
+    sendData.addEventListener("click", () => {
+      const data = {
+        description: desc.value.trim(),
+        tags: tags.value.split(",").map(s => s.trim()),
+        scheduled_at: formatDateTime(dtInput.value),
+      };
+
+      Telegram.WebApp.sendData(JSON.stringify(data));
+      Telegram.WebApp.close();
+    });
+  </script>
+</body>
+</html>
