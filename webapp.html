@@ -1,31 +1,108 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Download YouTube Shorts</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    input, button { font-size: 16px; margin: 6px 0; }
-    .result { margin-top: 20px; padding: 10px; background: #f0f0f0; white-space: pre-wrap; }
-  </style>
-</head>
-<body>
-  <h1>Download YouTube Shorts</h1>
+import os
+import asyncio
+from aiohttp import web
+from jinja2 import Environment, FileSystemLoader
+from yt_dlp import YoutubeDL
 
-  <form method="post" action="/download">
-    <p>
-      <label>YouTube Shorts link or channel:</label><br>
-      <input type="text" name="url" placeholder="https://youtube.com/@channel/shorts or https://youtube.com/shorts/..." style="width: 400px;">
-    </p>
-    <p>
-      <button type="submit">Download</button>
-    </p>
-  </form>
+# --- Config ---
+ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
+DOWNLOADS_DIR = os.path.join(ROOT_DIR, "downloads")
+os.makedirs(DOWNLOADS_DIR, exist_ok=True)
 
-  {% if log %}
-    <div class="result">
-      {{ log }}
-    </div>
-  {% endif %}
-</body>
-</html>
+# --- Jinja2 template loader ---
+loader = FileSystemLoader("templates")
+env = Environment(loader=loader)
+
+def render_index(log=""):
+    template = env.get_template("index.html")
+    html = template.render(log=log)
+    return web.Response(text=html, content_type="text/html")
+
+
+async def run_ytdlp(args, folder):
+    log = []
+
+    os.makedirs(folder, exist_ok=True)
+
+    proc = await asyncio.create_subprocess_exec(
+        "yt-dlp",
+        *args,
+        cwd=folder,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+
+    async def read_stream(stream, prefix):
+        while True:
+            line = await stream.readline()
+            if not line:
+                break
+            text = line.decode("utf-8", errors="replace").strip()
+            log.append(f"{prefix} {text}")
+
+    await asyncio.gather(
+        read_stream(proc.stdout, "OUT"),
+        read_stream(proc.stderr, "ERR"),
+    )
+
+    await proc.wait()
+    return "\n".join(log)
+
+
+def get_folder_name(url):
+    url = url.strip("/")
+    if "/shorts/" in url:
+        vid_id = url.split("/shorts/")[-1].split("?")[0]
+        return f"short_{vid_id}"
+    if "/@channel" in url and "/shorts" in url:
+        ch = url.split("/@")[-1].split("/")[0]
+        return f"channel_{ch}"
+    return "downloads"
+
+
+async def handle_download(request):
+    data = await request.post()
+    url = data.get("url", "").strip()
+
+    if not url:
+        return render_index("Please enter a URL.")
+
+    folder = os.path.join(DOWNLOADS_DIR, get_folder_name(url))
+
+    # Decide if it’s a channel shorts or single short
+    if "/shorts/" in url and "/shorts/" not in url.split("/@")[-1]:
+        # Single short
+        args = [
+            "--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best",
+            "--merge-output-format", "mp4",
+            "--output", "%(title)s.%(ext)s",
+            url,
+        ]
+        log = "Downloading single Short…\n"
+        log += await run_ytdlp(args, folder)
+    else:
+        # Channel Shorts tab
+        args = [
+            "--format", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best",
+            "--merge-output-format", "mp4",
+            "--output", "%(title)s.%(ext)s",
+            url,
+        ]
+        log = "Downloading all Shorts from channel tab…\n"
+        log += await run_ytdlp(args, folder)
+
+    return render_index(log)
+
+
+def main():
+    app = web.Application()
+    app.router.add_get("/", lambda r: render_index())
+    app.router.add_post("/download", handle_download)
+
+    print("In Termux, open browser to:")
+    print("  http://127.0.0.1:8080")
+    web.run_app(app, host="127.0.0.1", port=8080)
+
+
+if __name__ == "__main__":
+    main()
