@@ -1,0 +1,364 @@
+PROJECT: Local AI YouTube Shorts Factory
+
+GOAL
+
+Build a fully local, offline-first AI content generation platform that creates YouTube Shorts from trending topics and presents them in a human review dashboard before scheduling uploads.
+
+The system must run on:
+
+* RTX 4050 6GB VRAM
+* 16GB RAM
+* Windows or Linux
+* Python backend
+* Local models only for generation
+* No cloud AI dependencies
+
+PRIMARY MODEL
+
+Use Qwen3-8B as the reasoning and orchestration model.
+
+All agents should communicate through structured JSON.
+
+ARCHITECTURE
+
+Implement the system as a modular multi-agent platform.
+
+Required agents:
+
+1. Research Agent
+2. Script Agent
+3. Storyboard Agent
+4. Image Generation Agent
+5. Upscaling Agent
+6. Voiceover Agent
+7. Video Assembly Agent
+8. Thumbnail Agent
+9. Quality Review Agent
+10. Publishing Agent
+11. Scheduler Agent
+
+ORCHESTRATOR
+
+Create a central orchestration service.
+
+Responsibilities:
+
+* Manage workflows
+* Manage queues
+* Retry failed jobs
+* Track execution state
+* Store logs
+* Store outputs
+
+DATABASE
+
+Use PostgreSQL.
+
+Required tables:
+
+users
+projects
+workflows
+topics
+scripts
+storyboards
+images
+videos
+thumbnails
+reviews
+schedules
+uploads
+agent_logs
+
+RESEARCH AGENT
+
+Input:
+
+* Topic list
+* Keywords
+* RSS feeds
+* News sources
+
+Tasks:
+
+* Collect recent information
+* Remove duplicates
+* Extract facts
+* Rank stories
+
+Output JSON:
+
+{
+"topic": "",
+"summary": "",
+"facts": [],
+"source_urls": []
+}
+
+SCRIPT AGENT
+
+Input:
+
+Research output.
+
+Tasks:
+
+* Generate viral hook
+* Create 15-30 second narration
+* Create CTA
+* Generate title ideas
+* Generate descriptions
+* Generate tags
+
+Output JSON:
+
+{
+"hook": "",
+"narration": "",
+"title": "",
+"description": "",
+"tags": []
+}
+
+STORYBOARD AGENT
+
+Convert narration into 4-6 scenes.
+
+Output:
+
+{
+"scene_number": 1,
+"description": "",
+"image_prompt": ""
+}
+
+IMAGE GENERATION AGENT
+
+Use local Stable Diffusion XL.
+
+Generate:
+
+* 1024x576 images
+* Consistent style
+* Consistent characters
+
+Store images.
+
+UPSCALING AGENT
+
+Use Real-ESRGAN.
+
+Tasks:
+
+* Upscale images
+* Export 1920x1080 versions
+
+VOICEOVER AGENT
+
+Use Piper TTS.
+
+Tasks:
+
+* Generate narration audio
+* Export WAV and MP3
+
+VIDEO ASSEMBLY AGENT
+
+Use FFmpeg.
+
+Tasks:
+
+* Create 15-30 second video
+* Add zoom effects
+* Add transitions
+* Sync voiceover
+* Export MP4
+
+THUMBNAIL AGENT
+
+Generate:
+
+* Thumbnail image
+* Thumbnail text
+* CTR-optimized layout
+
+QUALITY REVIEW AGENT
+
+Score content:
+
+* Hook quality
+* Story quality
+* Visual quality
+* Thumbnail quality
+* CTR prediction
+
+Return:
+
+{
+"overall_score": 0-10,
+"hook_score": 0-10,
+"thumbnail_score": 0-10,
+"recommendation": ""
+}
+
+REVIEW DASHBOARD
+
+Build a web UI.
+
+Tech:
+
+Backend:
+
+* FastAPI
+
+Frontend:
+
+* React
+
+Features:
+
+Dashboard Page
+
+Show:
+
+* Pending videos
+* Approved videos
+* Scheduled videos
+* Published videos
+
+Video Detail Page
+
+Display:
+
+* Video player
+* Thumbnail
+* Script
+* Title
+* Description
+* Tags
+* Quality scores
+
+Actions:
+
+* Approve
+* Reject
+* Regenerate
+* Edit script
+* Edit title
+* Edit thumbnail
+* Schedule upload
+
+WORKFLOW
+
+Topic
+→ Research
+→ Script
+→ Storyboard
+→ Images
+→ Upscale
+→ Voice
+→ Video
+→ Thumbnail
+→ Quality Review
+→ Human Approval
+→ Schedule Upload
+
+PUBLISHING AGENT
+
+Integrate YouTube Data API.
+
+Features:
+
+* Upload videos
+* Upload thumbnails
+* Schedule publication
+* Set title
+* Set description
+* Set tags
+
+SCHEDULER
+
+Allow:
+
+* Manual scheduling
+* Automatic scheduling
+* Time-zone support
+
+ANALYTICS
+
+Dashboard metrics:
+
+* Videos generated
+* Videos approved
+* Videos uploaded
+* Average generation time
+* Agent performance
+* Error rates
+
+FILE STRUCTURE
+
+Create a professional monorepo:
+
+backend/
+frontend/
+agents/
+models/
+workflows/
+database/
+storage/
+scripts/
+tests/
+docs/
+
+REQUIREMENTS
+
+* Fully typed Python
+* Async where appropriate
+* Docker support
+* Unit tests
+* Integration tests
+* Logging
+* Error handling
+* Retry logic
+* Configuration management
+* Environment variables
+
+IMPLEMENTATION STRATEGY
+
+Do not generate all code at once.
+
+Proceed in phases:
+
+Phase 1:
+Database + Backend API
+
+Phase 2:
+Agent Framework
+
+Phase 3:
+Research + Script Agents
+
+Phase 4:
+Storyboard + Image Generation
+
+Phase 5:
+Voice + Video Generation
+
+Phase 6:
+Review Dashboard
+
+Phase 7:
+YouTube Publishing
+
+Phase 8:
+Testing
+
+After each phase:
+
+* Generate code
+* Generate tests
+* Run tests
+* Fix issues
+* Continue
+
+Maintain a task list and progress tracker throughout development.
