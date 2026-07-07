@@ -1,0 +1,544 @@
+# Project Specification: Batch Video Processing & YouTube Manager Enhancement
+
+## Project Overview
+
+I already have an existing   application called **YouTube Manager**. It already supports:
+
+- Google/YouTube authentication
+- Video uploads
+- Video scheduling
+- Watermark processing
+- FFmpeg processing
+- Video management
+- Thumbnail management
+
+I now want to build a second   application called **Batch Video Processing**, which integrates seamlessly with YouTube Manager.
+
+The objective is to automate the complete workflow:
+
+Content Source (Instagram or YouTube)
+↓
+Download Videos + Descriptions
+↓
+Organize into Channel Folders
+↓
+Apply Overlay/Watermark Templates
+↓
+Generate Processed Videos
+↓
+Export into YouTube Manager
+↓
+Batch Schedule Videos on YouTube
+
+Before writing any code:
+
+- Analyze the existing YouTube Manager project.
+- Understand its architecture.
+- Identify reusable modules.
+- Reuse existing functionality wherever possible.
+- Do not duplicate code.
+- Produce a development roadmap before implementation.
+- Build and test each module individually before moving to the next.
+
+---
+
+# PHASE 1 - Replace the Current Scheduling System (Highest Priority)
+
+This is the highest priority task and must be completed before any new features.
+
+## Current Behavior
+
+Currently, when I schedule a video, YouTube Manager keeps the video on my local computer and waits until the scheduled time before uploading it.
+
+I no longer want this behavior.
+
+## Required Behavior
+
+When I click **Schedule**, the application should immediately upload the video to YouTube using the YouTube Data API.
+
+During upload it should:
+
+- Upload the video immediately.
+- Upload title.
+- Upload description.
+- Upload thumbnail (if available).
+- Set the video's scheduled publish date and time using YouTube's native scheduling (`publishAt`).
+- Complete the upload immediately.
+
+After upload:
+
+- The video should already appear inside YouTube Studio.
+- It should appear as a Scheduled video.
+- My computer should no longer be involved.
+- My computer can be shut down.
+- There should be NO local scheduler running.
+
+The application should only show upload progress and confirmation.
+
+Once uploaded, YouTube is fully responsible for publishing at the scheduled time.
+
+This should replace the existing scheduling implementation throughout the project.
+
+---
+
+# PHASE 2 - Batch Video Processing Application
+
+Create a new   application called **Batch Video Processing**.
+
+This application prepares videos that will later be imported into YouTube Manager.
+
+The workflow should be:
+
+Download Videos
+↓
+
+Organize by Channel
+↓
+
+Create Overlay Templates
+↓
+
+Batch Process Videos
+↓
+
+Export into YouTube Manager
+
+---
+
+# Channel Management
+
+The application should use a root folder called:
+
+```
+Videos/
+```
+
+Each folder inside represents one content channel.
+
+Example:
+
+```
+Videos/
+
+Travel
+
+Gaming
+
+Quotes
+
+Facts
+
+Motivation
+```
+
+The application should automatically detect every channel folder and display them in the interface.
+
+Each channel should show:
+
+- Channel Name
+- Number of videos
+- Assigned Template
+- Processing Status
+
+---
+
+# Video Downloader
+
+Each channel should support downloading content from either:
+
+### Instagram
+
+OR
+
+### YouTube Shorts
+
+The user should be able to choose the source.
+
+---
+
+## Instagram Downloader
+
+The user enters an Instagram username.
+
+The application downloads:
+
+- Every Reel
+- Reel caption/description
+
+Files should be saved into the selected channel folder.
+
+---
+
+## YouTube Shorts Downloader
+
+The user enters:
+
+- YouTube Channel URL
+
+OR
+
+- Channel Handle
+
+OR
+
+- Channel ID
+
+The application downloads every available YouTube Short from that channel.
+
+For every Short it should save:
+
+- Video
+- Title
+- Description
+
+inside the selected channel folder.
+
+---
+
+## File Structure
+
+Every downloaded video should have a matching description file.
+
+Example
+
+```
+Videos/
+
+Travel/
+
+video001.mp4
+
+video001.txt
+
+video002.mp4
+
+video002.txt
+
+video003.mp4
+
+video003.txt
+```
+
+The txt filename must always exactly match the video filename.
+
+The txt file should contain:
+
+- Video title
+- Description
+- Hashtags (if available)
+
+---
+
+# Overlay Template Builder
+
+The Batch Video Processing application should reuse the watermark processing already available inside YouTube Manager.
+
+Do not rewrite existing FFmpeg or watermark code.
+
+The application should allow me to:
+
+- Open a sample video
+- Add one or more image overlays
+- Resize overlays
+- Move overlays
+- Set opacity
+- Preview output
+- Save as reusable template
+
+Example
+
+```
+Templates/
+
+Travel.json
+
+Gaming.json
+
+Quotes.json
+
+Facts.json
+```
+
+---
+
+# Assign Templates
+
+Every channel should have one assigned overlay template.
+
+Example
+
+Travel
+
+→ Travel Template
+
+Gaming
+
+→ Gaming Template
+
+Facts
+
+→ Facts Template
+
+Whenever videos are processed, the assigned template should automatically be applied.
+
+---
+
+# Batch Video Processing
+
+When I click **Process** for a channel:
+
+The application should process every video inside that channel folder.
+
+For every video:
+
+- Apply the assigned overlay template.
+- Preserve video quality.
+- Preserve audio.
+- Copy the matching txt description unchanged.
+
+Save the output into:
+
+```
+Travel_processed/
+```
+
+Example
+
+```
+Travel_processed/
+
+video001.mp4
+
+video001.txt
+
+video002.mp4
+
+video002.txt
+```
+
+---
+
+# Export to YouTube Manager
+
+After processing is complete,
+
+I should be able to click **Export**.
+
+Export should copy:
+
+- Processed videos
+- Matching description files
+
+into YouTube Manager.
+
+The export should preserve the folder structure.
+
+Example
+
+```
+Videos
+
+Travel
+
+video001
+
+video002
+
+Gaming
+
+video001
+
+video002
+```
+
+Export should NOT upload anything to YouTube.
+
+It should simply prepare the content inside YouTube Manager.
+
+---
+
+# PHASE 3 - Enhance YouTube Manager
+
+After export, improve YouTube Manager to better manage imported content.
+
+---
+
+# Folder-Based Video Library
+
+Currently, the Videos page displays every video in a single flat list.
+
+Replace this with folder grouping.
+
+Example
+
+```
+Videos
+
+▼ Travel
+
+video001
+
+video002
+
+video003
+
+▼ Gaming
+
+video001
+
+video002
+
+▼ Quotes
+
+video001
+
+video002
+```
+
+Folders should support:
+
+- Expand
+- Collapse
+- Select All
+- Multi-select
+- Batch Actions
+
+---
+
+# Folder Operations
+
+Each folder should support:
+
+- Processed video count
+- Scheduled video count
+- Uploaded video count
+- Last export date
+
+---
+
+# Batch Approval
+
+Instead of approving one video at a time,
+
+I should be able to:
+
+- Approve Entire Folder
+- Reject Entire Folder
+- Select Individual Videos
+- Bulk Edit Descriptions (future support)
+
+---
+
+# Batch Scheduling
+
+When a folder is selected,
+
+I should be able to schedule every video together.
+
+Example
+
+Start Date
+
+10 July 2026
+
+Start Time
+
+09:00 AM
+
+Interval
+
+Every 3 Hours
+
+The application should automatically calculate publish times.
+
+Example
+
+Video 1
+
+09:00
+
+Video 2
+
+12:00
+
+Video 3
+
+15:00
+
+Video 4
+
+18:00
+
+...
+
+Video 100
+
+Automatically calculated
+
+The schedule should be visible before upload.
+
+The user should be able to edit any individual video's publish time before scheduling.
+
+---
+
+# Batch Upload to YouTube
+
+When I click **Schedule Folder**,
+
+the application should immediately upload every video in that folder.
+
+Each upload should include:
+
+- Video
+- Title
+- Description
+- Thumbnail (if available)
+- Scheduled publish time
+
+Every upload should use YouTube's native scheduling.
+
+After upload completes:
+
+If the folder contains 100 videos,
+
+I should immediately see all 100 videos already uploaded inside YouTube Studio as Scheduled videos waiting for their publish times.
+
+No local scheduler should remain active.
+
+No background waiting process should exist.
+
+YouTube becomes the scheduler.
+
+---
+
+# Future Extensibility
+
+Design the application with a modular architecture so additional download sources can easily be added later.
+
+Examples:
+
+- TikTok
+- Facebook Reels
+- X (Twitter) Videos
+- Pinterest
+- Vimeo
+
+Adding a new source should require implementing only a new downloader module without affecting the rest of the application.
+
+---
+
+# Development Guidelines
+
+- Analyze the existing YouTube Manager project before writing code.
+- Reuse existing modules wherever possible.
+- Reuse watermark processing.
+- Reuse FFmpeg processing.
+- Reuse authentication.
+- Reuse upload logic.
+- Replace the existing scheduling logic with YouTube-native scheduling.
+- Avoid duplicate code.
+- Follow clean architecture principles.
+- Build one module at a time.
+- Thoroughly test each module before proceeding.
+- Ensure all new functionality integrates cleanly without breaking existing YouTube Manager features.
+- Maintain well-documented, modular, and maintainable code throughout the project.
