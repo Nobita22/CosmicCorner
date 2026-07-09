@@ -1,0 +1,249 @@
+Build a Unified Media Pipeline Application called YT Manager runs on port 5555 and add it to auto serve on boot. Break down this build into phases and inform me when each phase is done. perform tests and audits on it.
+
+I want to build a single production-ready application by combining the functionality of my existing YouTube Manager and Batch Video Processing applications into one seamless workflow.
+
+This should not feel like two applications merged together. Instead, it should function as a completely new application designed around a project/folder-based workflow, where each folder represents an independent content publishing project.
+
+The entire application should support the complete lifecycle of YouTube content:
+
+Download → Organize → Edit → Process → AI Optimize → Schedule → Publish
+
+Everything should happen inside a single application without requiring users to switch between different tools.
+
+Core Architecture
+
+The primary object in the application is a Project Folder.
+
+Every folder is completely independent and contains everything required to publish content.
+
+A folder should contain:
+
+Original downloaded videos
+Uploaded videos
+Description (.txt) files
+Thumbnails
+Audio assets
+Watermark assets
+Processing template
+Schedule information
+Assigned YouTube account
+Processing status
+Upload status
+
+Nothing should exist globally except YouTube accounts.
+
+Everything else belongs to a folder.
+
+This makes the application scalable and easy to manage.
+
+Media Import System
+
+Inside every folder, users should be able to import media from multiple sources.
+
+Supported sources include:
+
+Entire YouTube Shorts channels
+Individual YouTube Shorts
+Standard YouTube videos
+YouTube playlists
+Manual video uploads
+
+When downloading a channel or playlist, users should first see a list of available videos and choose whether to download all or only selected items.
+
+The application should support batch downloading with progress indicators, queue management, pause/resume, retry on failure, and duplicate detection to prevent downloading the same content multiple times.
+
+Manual Upload Workflow
+
+Users should also be able to upload their own video files into any folder.
+
+Each upload card should allow entering:
+
+Title
+Description
+Tags
+Schedule date
+Schedule time
+Thumbnail
+
+When the upload is completed, the application should automatically create a text file using the same filename as the video.
+
+Example:
+
+Video001.mp4
+Video001.txt
+
+The TXT file stores the description and always remains linked to its corresponding video.
+
+This file should be editable at any time.
+
+Visual Template Editor
+
+Every folder should have its own reusable processing template.
+
+Instead of manually entering X/Y coordinates or numeric values, the template editor should provide a professional visual canvas similar to modern video editing software.
+
+Users should be able to:
+
+Drag elements
+Resize
+Rotate
+Scale
+Move freely
+Snap to guides
+Zoom
+Pan
+Arrange layers
+Lock layers
+Hide layers
+Duplicate layers
+
+Supported layers include:
+
+Video
+Images
+Watermarks
+Audio
+Text
+Stickers
+Shapes
+Backgrounds
+
+The goal is to let users visually design how every processed video should look.
+
+After the template is saved, it belongs only to that folder.
+
+Batch Video Processing
+
+Once a template has been created, users should be able to process every video inside that folder with a single click.
+
+The processing pipeline should automatically apply:
+
+Watermarks
+Audio tracks
+Volume adjustments
+Cropping
+Scaling
+Positioning
+Backgrounds
+Overlays
+Fade effects
+Multiple image layers
+Multiple audio layers
+
+Processing should run as a background task with progress tracking and error recovery.
+
+AI Metadata Management
+
+Reuse the AI model already integrated into the existing application.
+
+Do not replace it.
+
+The AI should rewrite YouTube descriptions while preserving the original meaning and improving readability, SEO, and engagement.
+
+Users should be able to rewrite:
+
+A single video's description
+Multiple selected descriptions
+Every description in a folder
+
+The rewritten content should automatically replace the existing TXT file linked to each video.
+
+YouTube Account Management
+
+Create a dedicated Authentication page where users can manage multiple YouTube accounts.
+
+The system should allow:
+
+Adding multiple accounts
+Removing accounts
+Reconnecting expired accounts
+Refreshing OAuth tokens automatically
+Viewing account information
+
+Each project folder should be assigned exactly one YouTube account.
+
+This assignment determines where videos from that folder will be uploaded.
+
+Scheduling Workflow
+
+Scheduling should reuse the proven upload logic from the existing YouTube Manager.
+
+Do not rebuild the scheduling engine unless necessary.
+
+The Schedule action should only be available when every selected video satisfies the following conditions:
+
+Video file exists
+Matching TXT description exists
+Schedule date is set
+Schedule time is set
+Folder has an assigned YouTube account
+
+If any requirement is missing, the application should clearly explain why scheduling cannot proceed.
+
+Users should be able to:
+
+Schedule a single video
+Schedule selected videos
+Schedule every video in the folder
+
+Each upload should:
+
+Upload the video as Private
+Apply the corresponding title, description, tags, and thumbnail
+Schedule publication using the video's assigned date and time
+Preserve all metadata during upload
+Folder Workflow
+
+The expected workflow should be:
+
+Create a project folder.
+Download YouTube Shorts, playlists, or upload local videos.
+Automatically create or link description TXT files.
+Assign a YouTube account to the folder.
+Create and save a reusable processing template.
+Process all videos using the template.
+Optionally rewrite descriptions with AI.
+Set publishing dates and times.
+Select the videos to upload.
+Click Schedule Selected Videos.
+Upload videos privately and schedule them automatically.
+
+The entire process should require minimal repetitive work.
+
+User Interface
+
+The application should provide a modern, professional workspace rather than a compact dashboard.
+
+The design should feel similar to creative productivity software such as Adobe Premiere Pro, DaVinci Resolve, Figma, or Notion, with a clean and spacious layout.
+
+The interface should include:
+
+Responsive layouts for desktop, tablet, and mobile
+Large touch-friendly controls
+Sidebar navigation
+Breadcrumb navigation
+Resizable panels
+Drag-and-drop interactions
+Bulk action toolbars
+Keyboard shortcuts
+Context menus
+Smooth animations
+Dark and light themes
+Performance & Scalability
+
+The application should be capable of managing hundreds of folders and thousands of videos efficiently.
+
+It should support:
+
+Background processing
+Concurrent downloads
+Batch rendering
+Queue management
+Automatic retries
+Crash recovery
+Lazy loading
+Progress tracking
+Cancellation and resume of long-running tasks
+Development Standards
+
+Use a modular, maintainable architecture with reusable components, clean separation of concerns, secure credential storage, comprehensive validation, detailed logging, and production-ready error handling. Reuse the existing YouTube Manager scheduling logic and AI caption rewriting engine wherever possible instead of duplicating functionality. The final result should feel like a cohesive, end-to-end Content Operations Platform rather than a collection of separate tools, enabling users to efficiently download, organize, process, optimize, and schedule YouTube content at scale.
